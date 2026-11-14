@@ -85,11 +85,11 @@ h4 {
 
 /* All in one row when it fits, else one per line; never a mix. --fit is the measured single-row width plus margin. */
 .legend {
-  --fit: 28em;
+  --fit: 26em;
 }
 
 .legend.long {
-  --fit: 45em;
+  --fit: 43em;
 }
 
 .legend li {

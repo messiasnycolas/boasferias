@@ -11,7 +11,8 @@ import { Mode, SuggestInput } from './suggest-plans';
 
 const DEFAULT_DAYS: Record<Mode, number> = { clt: 30, pj: 20 };
 const DEFAULT_MAX_PERIODS = 3;
-const DEFAULT_LIMIT = 10;
+/** Plans computed by default; the page can ask for more, up to MAX_LIMIT. */
+export const DEFAULT_LIMIT = 3;
 
 /** Work-week presets (0 = Sunday). */
 export const WORK_WEEKS = { 'mon-fri': MON_FRI, 'mon-sat': MON_SAT } as const;

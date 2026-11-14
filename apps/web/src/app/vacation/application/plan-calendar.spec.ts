@@ -33,7 +33,7 @@ describe('defaultInput', () => {
       workWeek: [1, 2, 3, 4, 5],
       removedHolidays: [],
       extraDaysOff: [],
-      limit: 10,
+      limit: 3,
     });
   });
 
@@ -55,7 +55,7 @@ describe('planCalendar', () => {
     expect(months.map((m) => `${m.year}-${m.month}`)).toEqual(['2027-1', '2027-2']);
     expect(months[1].days[0]).toBeNull(); // February 2027 starts on a Monday
     expect(kinds(clt, view, 2)?.startsWith('1v 2v 3v 4v 5v 6o 7o 8o 9o 10n')).toBe(true);
-    expect(months[1].days.find((d) => d?.day === 8)?.holiday).toBe('Folga adicionada');
+    expect(months[1].days.find((d) => d?.day === 8)?.holiday).toBe('Licença ou banco de horas');
   });
 
   it('flags days the CLT counts as vacation even though they are off', () => {

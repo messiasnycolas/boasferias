@@ -4,15 +4,15 @@ What the calculator assumes, with sources. Verified 2026-11-14.
 
 ## CLT (Decreto-lei 5.452/1943)
 
-| Rule | Source |
-|---|---|
-| 30 calendar days per 12 months; 24/18/12 with 6-14/15-23/24-32 unjustified absences (user enters the days available, minimum 5 after selling) | art. 130 |
-| Up to 3 periods; one >= 14 days, the others >= 5 | art. 134 §1 |
-| No start in the 2 days before a holiday or the weekly paid rest day | art. 134 §3 |
-| Written notice >= 30 days before the start | art. 135 |
-| Employer chooses the dates: results are suggestions to negotiate | art. 136 |
-| Sell 1/3 for cash (abono pecuniário); request up to 15 days before the acquisition period ends (not checked) | art. 143 |
-| Every vacation day inside the concession period; days after it are paid double | art. 134, art. 137, TST Súmula 81 |
+| Rule                                                                                                                                          | Source                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| 30 calendar days per 12 months; 24/18/12 with 6-14/15-23/24-32 unjustified absences (user enters the days available, minimum 5 after selling) | art. 130                          |
+| Up to 3 periods; one >= 14 days, the others >= 5                                                                                              | art. 134 §1                       |
+| No start in the 2 days before a holiday or the weekly paid rest day                                                                           | art. 134 §3                       |
+| Written notice >= 30 days before the start                                                                                                    | art. 135                          |
+| Employer chooses the dates: results are suggestions to negotiate                                                                              | art. 136                          |
+| Sell 1/3 for cash (abono pecuniário); request up to 15 days before the acquisition period ends (not checked)                                  | art. 143                          |
+| Every vacation day inside the concession period; days after it are paid double                                                                | art. 134, art. 137, TST Súmula 81 |
 
 Days are calendar days: weekends and holidays inside a period count as vacation.
 

@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 
 const showPlans = async (page: Page) => {
   await page.getByRole('button', { name: 'Ver melhores datas' }).click();
-  await expect(page.getByRole('heading', { name: 'Plano 1', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Plano A', exact: true })).toBeVisible();
 };
 
 /** Rightmost edge of anything on the page; phone emulation widens innerWidth, so compare to the real screen. */
@@ -31,9 +31,14 @@ test.describe('before the first click', () => {
     await expect(page.locator('.results')).toBeFocused();
   });
 
-  test('already lists the holidays in Mais opções', async ({ page }) => {
-    await page.getByText('Mais opções').click();
-    await expect(page.locator('.holidays li').first()).toBeVisible();
+  test('lists the holidays in their own closed section', async ({ page }) => {
+    const section = page.locator('details', { hasText: 'Feriados no período' });
+    await expect(section).not.toHaveAttribute('open');
+    await expect(page.locator('details', { hasText: 'Mais filtros' })).not.toContainText(
+      'Sexta-feira Santa',
+    );
+    await page.getByText('Feriados no período').click();
+    await expect(section.locator('.holidays li').first()).toBeVisible();
   });
 
   test('centres the form on desktop, then shows form and plans side by side', async ({ page }) => {
@@ -58,22 +63,44 @@ test.describe('with the plans shown', () => {
   });
 
   test('ranks CLT plans with the defaults and shows the first on a calendar', async ({ page }) => {
-    await expect(firstPlan(page)).toContainText('43 dias de folga');
+    await expect(firstPlan(page)).toContainText('43 dias de descanso');
     await expect(firstPlan(page)).toContainText('+13 extras');
     const days = page.locator('.plan.selected').locator('.day.vacation, .day.counted');
     await expect(days).toHaveCount(30);
   });
 
   test('groups ties and labels days the CLT counts as vacation', async ({ page }) => {
-    await expect(firstPlan(page)).toContainText('Mais 9 planos empatam com este');
+    await expect(firstPlan(page)).toContainText('Empatado com os planos B e C');
+    await expect(page.locator('.plan').nth(1)).toContainText('Empatado com os planos A e C');
     await expect(page.getByText('Contado como férias pela CLT')).toBeVisible();
-    await expect(page.locator('.plan')).toHaveCount(3);
-    await page.getByRole('button', { name: 'Ver mais 7 planos' }).click();
-    await expect(page.locator('.plan')).toHaveCount(10);
   });
 
-  test('removing a holiday or adding a day off changes the results', async ({ page }) => {
-    await page.getByText('Mais opções').click();
+  test('calculates 5 more plans at a time, up to 20, and back to 3 on any change', async ({
+    page,
+  }) => {
+    const plans = page.locator('.plan');
+    await expect(plans).toHaveCount(3);
+    for (const count of [8, 13, 18]) {
+      await page.getByRole('button', { name: 'Calcular mais 5 planos' }).click();
+      await expect(plans).toHaveCount(count);
+    }
+    await page.getByRole('button', { name: 'Calcular mais 2 planos' }).click();
+    await expect(plans).toHaveCount(20);
+    await expect(plans.last().getByRole('heading')).toHaveText('Plano T');
+    await expect(page.getByRole('button', { name: /Calcular mais/ })).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Menos um dia' }).click();
+    await expect(plans).toHaveCount(3);
+  });
+
+  test('never says folga', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    await page.getByText('Feriados no período').click();
+    await expect(page.locator('body')).not.toContainText(/folga/i);
+  });
+
+  test('removing a holiday or adding a leave day changes the results', async ({ page }) => {
+    await page.getByText('Feriados no período').click();
     const before = await firstPlan(page).innerText();
     await page
       .getByRole('listitem')
@@ -83,7 +110,8 @@ test.describe('with the plans shown', () => {
     await expect(firstPlan(page)).not.toHaveText(before);
 
     const afterRemoval = await firstPlan(page).innerText();
-    await page.getByLabel('Data da folga').fill('2027-02-09');
+    await page.getByText('Mais filtros').click();
+    await page.getByLabel('Data da licença ou banco de horas').fill('2027-02-09');
     await page.getByRole('button', { name: 'Adicionar' }).click();
     await expect(firstPlan(page)).not.toHaveText(afterRemoval);
   });
@@ -95,7 +123,7 @@ test.describe('with the plans shown', () => {
     await expect(page.getByText('Na CLT, use de 5 a 30 dias')).toBeVisible();
 
     await page.getByLabel('Dias de férias').fill('30');
-    await page.getByText('Mais opções').click();
+    await page.getByText('Mais filtros').click();
     await page.getByLabel('Terminar até').fill('2027-02-20');
     await expect(page.getByText('Nenhum plano cabe')).toBeVisible();
   });
@@ -156,7 +184,8 @@ test.describe('with the plans shown', () => {
       test.use({ viewport: { width, height: 800 } });
 
       test('every option fits the screen, is accessible and easy to tap', async ({ page }) => {
-        await page.getByText('Mais opções').click();
+        await page.getByText('Mais filtros').click();
+        await page.getByText('Feriados no período').click();
         await page.getByRole('radio', { name: 'Outra' }).click();
         await expect(page.locator('.chip')).toHaveCount(7);
 
@@ -170,7 +199,7 @@ test.describe('with the plans shown', () => {
       });
 
       test('date pickers have room for their content', async ({ page }) => {
-        await page.getByText('Mais opções').click();
+        await page.getByText('Mais filtros').click();
         for (const id of ['#start', '#deadline', '#dayoff']) {
           const input = page.locator(id);
           const needed = await input.evaluate((el) => {
@@ -185,7 +214,7 @@ test.describe('with the plans shown', () => {
       });
 
       test('wrapped holiday names keep their row padding', async ({ page }) => {
-        await page.getByText('Mais opções').click();
+        await page.getByText('Feriados no período').click();
         const gaps = await page.locator('.holidays li').evaluateAll((items) =>
           items.map((li) => {
             const row = li.getBoundingClientRect();

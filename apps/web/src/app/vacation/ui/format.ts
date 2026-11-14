@@ -36,8 +36,28 @@ export function monthName(year: number, monthNumber: number): string {
   return `${name[0].toUpperCase()}${name.slice(1)} ${year}`;
 }
 
+/** "A", "B" … "T": plans are named by letter so the page shows fewer numbers. */
+export function planLetter(index: number): string {
+  return String.fromCharCode(65 + index);
+}
+
+/** "Empatado com o plano F", "Empatado com os planos B e C", "… os planos A, C a H e J". */
+export function tieNote(indexes: readonly number[]): string {
+  const runs: string[] = [];
+  for (let i = 0; i < indexes.length;) {
+    let j = i;
+    while (j + 1 < indexes.length && indexes[j + 1] === indexes[j] + 1) j++;
+    const [first, last] = [planLetter(indexes[i]), planLetter(indexes[j])];
+    if (j - i >= 2) runs.push(`${first} a ${last}`);
+    else runs.push(...indexes.slice(i, j + 1).map(planLetter));
+    i = j + 1;
+  }
+  const list = runs.length > 1 ? `${runs.slice(0, -1).join(', ')} e ${runs.at(-1)}` : runs[0];
+  return indexes.length === 1 ? `Empatado com o plano ${list}` : `Empatado com os planos ${list}`;
+}
+
 export const ERROR_MESSAGES: Record<SuggestError, string> = {
-  'invalid-date': 'Alguma data está incompleta. Confira as datas em "Mais opções".',
+  'invalid-date': 'Alguma data está incompleta. Confira as datas em "Mais filtros".',
   'deadline-before-start': 'O prazo final vem antes do início. Ajuste as datas.',
   'window-too-long': 'Escolha um intervalo de até 13 meses entre o início e o prazo.',
   'invalid-days':

@@ -6,7 +6,7 @@ const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   vacation: 'férias',
   counted: 'férias contadas pela CLT',
-  off: 'folga',
+  off: 'descanso',
   none: '',
 };
 
@@ -16,11 +16,11 @@ const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   template: `
     <ul class="legend" [class.long]="hasCounted()">
       <li><i class="swatch vacation"></i>Férias</li>
-      <li><i class="swatch off"></i>Folga</li>
+      <li><i class="swatch off"></i>Descanso</li>
       @if (hasCounted()) {
         <li><i class="swatch counted"></i>Contado como férias pela CLT</li>
       }
-      <li><b class="holiday-mark">12</b>Feriado ou folga adicionada</li>
+      <li><b class="holiday-mark">12</b>Feriado ou licença</li>
     </ul>
     <div class="months">
       @for (month of months(); track month.year * 100 + month.month) {

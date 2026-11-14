@@ -13,17 +13,25 @@ import {
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { WORK_WEEKS, defaultInput } from '../application/defaults';
+import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
 import { planCalendar } from '../application/plan-calendar';
-import { LIMITS, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
-import { ERROR_MESSAGES, formatDate, formatDay, formatRange, todayIso } from './format';
+import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
+import {
+  ERROR_MESSAGES,
+  formatDate,
+  formatDay,
+  formatRange,
+  planLetter,
+  tieNote,
+  todayIso,
+} from './format';
 import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
 
 type WeekPreset = keyof typeof WORK_WEEKS | 'custom';
 
 const RECOMPUTE_DELAY_MS = 250;
-const PLANS_SHOWN = 3;
+const MORE_PLANS_STEP = 5;
 const WEEKDAY_CHIPS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
@@ -54,6 +62,7 @@ export class PlannerPage {
   protected readonly formatRange = formatRange;
   protected readonly formatDate = formatDate;
   protected readonly formatDay = formatDay;
+  protected readonly planLetter = planLetter;
 
   protected readonly weekPreset = computed<WeekPreset>(() => {
     if (this.customWeek()) return 'custom';
@@ -68,10 +77,12 @@ export class PlannerPage {
     return result?.ok ? result.plans : [];
   });
 
-  protected readonly showAll = signal(false);
-  protected readonly visiblePlans = computed(() =>
-    this.showAll() ? this.plans() : this.plans().slice(0, PLANS_SHOWN),
-  );
+  /** How many more plans "Calcular mais" asks for; 0 when at the cap or when no more exist. */
+  protected readonly morePlans = computed(() => {
+    const input = this.resultInput();
+    if (!input || this.plans().length < input.limit) return 0;
+    return Math.min(MORE_PLANS_STEP, MAX_LIMIT - input.limit);
+  });
 
   protected readonly error = computed(() => {
     const result = this.result();
@@ -114,8 +125,15 @@ export class PlannerPage {
     });
   }
 
+  /** Any change other than asking for more plans starts again from the default count. */
   protected patch(change: Partial<SuggestInput>): void {
-    this.form.update((form) => ({ ...form, ...change }));
+    this.form.update((form) => ({ ...form, limit: DEFAULT_LIMIT, ...change }));
+  }
+
+  /** aria-disabled, not disabled, while loading: keeps keyboard focus on the button. */
+  protected calculateMore(): void {
+    if (this.loading()) return;
+    this.patch({ limit: this.form().limit + this.morePlans() });
   }
 
   protected setMode(mode: Mode): void {
@@ -176,12 +194,13 @@ export class PlannerPage {
     afterNextRender(() => this.results()?.nativeElement.focus(), { injector: this.injector });
   }
 
-  /** How many later plans tie with this one, counted only on the first of a tie group. */
-  protected tiesAfter(index: number): number {
+  /** "Empatado com os planos B e C", or null when no other shown plan has the same days off. */
+  protected tiedWith(index: number): string | null {
     const plans = this.plans();
-    const score = plans[index].daysOff;
-    if (index > 0 && plans[index - 1].daysOff === score) return 0;
-    return plans.slice(index + 1).filter((p) => p.daysOff === score).length;
+    const others = plans
+      .map((plan, i) => (i !== index && plan.daysOff === plans[index].daysOff ? i : -1))
+      .filter((i) => i >= 0);
+    return others.length ? tieNote(others) : null;
   }
 
   private async compute(input: SuggestInput): Promise<void> {
@@ -189,10 +208,15 @@ export class PlannerPage {
     this.loading.set(true);
     const result = await this.client.run(input);
     if (input !== this.form()) return; // a newer input is on its way
+    const onlyMorePlans = sameExceptLimit(input, this.resultInput());
     this.result.set(result);
     this.resultInput.set(input);
-    this.selected.set(0);
-    this.showAll.set(false);
+    if (!onlyMorePlans) this.selected.set(0);
     this.loading.set(false);
   }
+}
+
+/** True when two inputs differ at most in how many plans they ask for. */
+function sameExceptLimit(a: SuggestInput, b: SuggestInput | null): boolean {
+  return !!b && JSON.stringify({ ...a, limit: 0 }) === JSON.stringify({ ...b, limit: 0 });
 }

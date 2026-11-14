@@ -30,7 +30,7 @@ export interface CalendarMonth {
   days: (CalendarDay | null)[];
 }
 
-const EXTRA_DAY_OFF = 'Folga adicionada';
+const EXTRA_DAY_OFF = 'Licença ou banco de horas';
 
 /** Month grids for the months that hold days off in `plan`; empty months between periods are skipped. */
 export function planCalendar(input: SuggestInput, plan: PlanView): CalendarMonth[] {

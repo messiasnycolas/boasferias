@@ -213,13 +213,14 @@ svg {
   margin: 6px 0;
 }
 
+/* Thumb sized from the track's inner edges: the same 3 px gap on every side. */
 .switch input::after {
   content: '';
   position: absolute;
-  top: 2.5px;
-  left: 2.5px;
-  width: 24px;
-  height: 24px;
+  inset-block: 3px;
+  left: 3px;
+  box-sizing: border-box;
+  aspect-ratio: 1;
   border-radius: 50%;
   background: #fff;
   border: 1.5px solid var(--ink);
@@ -232,6 +233,7 @@ svg {
 }
 
 .switch input:checked::after {
+  /* Track inner width 49 - thumb 23 - 2 x 3 gap. */
   transform: translateX(20px);
 }
 
@@ -243,6 +245,10 @@ svg {
   font-weight: 700;
   cursor: pointer;
   list-style: none;
+}
+
+.more + .more {
+  border-top: 1px solid var(--line);
 }
 
 .more summary::-webkit-details-marker {
@@ -414,7 +420,12 @@ button.link {
   background: rgb(243 226 191 / 10%);
 }
 
-.raised:active {
+.raised[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.raised:active:not([aria-disabled='true']) {
   transform: translate(-4px, 3px);
   box-shadow: none;
 }

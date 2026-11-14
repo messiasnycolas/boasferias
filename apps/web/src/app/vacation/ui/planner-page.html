@@ -34,7 +34,7 @@
       </button>
     </div>
   </div>
-  <p class="tagline">Descubra quando tirar férias para ter mais dias de folga.</p>
+  <p class="tagline">Descubra quando tirar férias para ter mais dias de descanso.</p>
 </header>
 
 <main class="layout" [class.revealed]="revealed()">
@@ -43,7 +43,7 @@
     <div class="card-body">
       <div class="field">
         <label for="days">{{
-          form().mode === 'clt' ? 'Dias de férias' : 'Dias úteis de folga'
+          form().mode === 'clt' ? 'Dias de férias' : 'Dias úteis de descanso'
         }}</label>
         <div class="stepper">
           <button
@@ -119,7 +119,7 @@
 
       <details class="more">
         <summary>
-          Mais opções
+          Mais filtros
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
         </summary>
 
@@ -196,30 +196,10 @@
         </fieldset>
 
         <fieldset class="field stacked">
-          <legend>Feriados no período</legend>
-          @if (holidays().length) {
-            <ul class="holidays">
-              @for (h of holidays(); track h.date) {
-                <li [class.removed]="form().removedHolidays.includes(h.date)">
-                  <span
-                    ><b>{{ formatDay(h.date) }}</b> {{ h.name }}</span
-                  >
-                  <button type="button" class="link" (click)="toggleHoliday(h.date)">
-                    {{ form().removedHolidays.includes(h.date) ? 'Considerar' : 'Remover' }}
-                  </button>
-                </li>
-              }
-            </ul>
-          } @else {
-            <p class="hint">Os feriados aparecem depois do primeiro cálculo.</p>
-          }
-        </fieldset>
-
-        <fieldset class="field stacked">
-          <legend>Folgas extras</legend>
-          <p class="hint">Feriado da sua cidade, Carnaval, folga da empresa.</p>
+          <legend>Licença ou banco de horas</legend>
+          <p class="hint">Dias que você já tem livres, como licença ou banco de horas.</p>
           <div class="add">
-            <label class="visually-hidden" for="dayoff">Data da folga</label>
+            <label class="visually-hidden" for="dayoff">Data da licença ou banco de horas</label>
             <input
               id="dayoff"
               type="date"
@@ -242,6 +222,29 @@
           }
         </fieldset>
       </details>
+
+      <details class="more">
+        <summary>
+          Feriados no período
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+        </summary>
+        @if (holidays().length) {
+          <ul class="holidays">
+            @for (h of holidays(); track h.date) {
+              <li [class.removed]="form().removedHolidays.includes(h.date)">
+                <span
+                  ><b>{{ formatDay(h.date) }}</b> {{ h.name }}</span
+                >
+                <button type="button" class="link" (click)="toggleHoliday(h.date)">
+                  {{ form().removedHolidays.includes(h.date) ? 'Considerar' : 'Remover' }}
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="hint">Os feriados aparecem depois do primeiro cálculo.</p>
+        }
+      </details>
     </div>
 
     <div class="card-foot">
@@ -262,7 +265,7 @@
         @if (loading()) {
           Calculando as melhores datas…
         } @else if (plans().length) {
-          {{ plans().length }} planos, do que rende mais folga para o que rende menos.
+          {{ plans().length }} planos, do que rende mais descanso para o que rende menos.
         }
       </p>
 
@@ -282,21 +285,18 @@
       }
 
       <ol class="plans" [class.stale]="loading()">
-        @for (plan of visiblePlans(); track $index) {
+        @for (plan of plans(); track $index) {
           <li class="card plan" [class.selected]="selected() === $index">
             <div class="card-head">
-              <h3>Plano {{ $index + 1 }}</h3>
+              <h3>Plano {{ planLetter($index) }}</h3>
               <span class="extra">+{{ plan.extraDays }} extras</span>
             </div>
             <div class="card-body">
               <p class="days-off">
-                <span class="number">{{ plan.daysOff }}</span> dias de folga
+                <span class="number">{{ plan.daysOff }}</span> dias de descanso
               </p>
-              @if (tiesAfter($index); as ties) {
-                <p class="tie">
-                  Mais {{ ties }} {{ ties === 1 ? 'plano empata' : 'planos empatam' }} com este:
-                  escolha o que encaixa melhor.
-                </p>
+              @if (tiedWith($index); as tie) {
+                <p class="tie">{{ tie }}</p>
               }
               <ul class="periods">
                 @for (period of plan.periods; track period.start) {
@@ -305,7 +305,7 @@
                     <span>
                       {{ period.daysSpent }}
                       {{ form().mode === 'clt' ? 'dias de férias' : 'dias úteis' }} →
-                      {{ period.daysOff }} de folga
+                      {{ period.daysOff }} de descanso
                     </span>
                   </li>
                 }
@@ -324,9 +324,14 @@
           </li>
         }
       </ol>
-      @if (plans().length > visiblePlans().length) {
-        <button type="button" class="raised more-plans" (click)="showAll.set(true)">
-          Ver mais {{ plans().length - visiblePlans().length }} planos
+      @if (morePlans(); as more) {
+        <button
+          type="button"
+          class="raised more-plans"
+          [attr.aria-disabled]="loading()"
+          (click)="calculateMore()"
+        >
+          Calcular mais {{ more }} planos
         </button>
       }
 

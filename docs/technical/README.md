@@ -14,14 +14,14 @@ Without Docker: `cd apps/web && npm ci && npm start` (Node version in `apps/web/
 
 From `apps/web`:
 
-| Command | What |
-|---|---|
-| `npm test` | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders |
-| `npm run lint` | ESLint (angular-eslint) |
-| `npm run format:check` | Prettier (`npm run format` fixes) |
-| `npm run build` | Prerendered output in `dist/web/browser` |
-| `npm run e2e` | Playwright + axe on the built page (`npm run build` first); main journey, states, 320 and 360 px, 44 px targets |
-| `npx @lhci/cli@0.16.1 autorun` | Lighthouse budgets from `lighthouserc.json` (needs Chrome; runs in CI) |
+| Command                        | What                                                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `npm test`                     | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders                                     |
+| `npm run lint`                 | ESLint (angular-eslint)                                                                                         |
+| `npm run format:check`         | Prettier (`npm run format` fixes)                                                                               |
+| `npm run build`                | Prerendered output in `dist/web/browser`                                                                        |
+| `npm run e2e`                  | Playwright + axe on the built page (`npm run build` first); main journey, states, 320 and 360 px, 44 px targets |
+| `npx @lhci/cli@0.16.1 autorun` | Lighthouse budgets from `lighthouserc.json` (needs Chrome; runs in CI)                                          |
 
 Without Chrome's system libraries (WSL), run browser checks in Playwright's image:
 
