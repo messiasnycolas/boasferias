@@ -24,7 +24,7 @@ From `apps/web`:
 
 ## Deploy
 
-Push to `main` touching `apps/web/**` or `firebase.json` runs `.github/workflows/web.yml`: the gate above plus `npm audit`, then deploys to Firebase Hosting. To rerun without a commit: Actions > web > Run workflow on `main`. No credentials in the repo: GitHub Actions gets a short-lived token through Workload Identity Federation.
+Push to `main` touching `apps/web/**` or `firebase.json` runs `.github/workflows/web.yml`: the gate above plus `npm audit`, then deploys to Firebase Hosting. Deploy runs only on pushes to `main`, never on pull requests. No credentials in the repo: GitHub Actions gets a short-lived token through Workload Identity Federation.
 
 Rollback: revert the commit, or roll back the release in the Firebase console (Hosting > Release history).
 
