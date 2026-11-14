@@ -2,6 +2,12 @@
    hidden address bar, which made the first screen scroll. */
 :host {
   display: block;
+  /* Header and main share one column: the form's width before the first click, wider after. */
+  --column: 472px;
+}
+
+:host(.revealed) {
+  --column: 1080px;
 }
 
 /* Sky */
@@ -17,12 +23,12 @@
     var(--sky)
   );
   color: var(--ink);
-  padding: 16px 16px 72px;
+  padding: 24px 16px 76px;
 }
 
 .bar-inner,
 .tagline {
-  max-width: 1080px;
+  max-width: calc(var(--column) - 32px);
   margin: 0 auto;
 }
 
@@ -38,20 +44,25 @@ h1 {
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 22px;
+  /* Grows with the screen, but stays on one line next to the CLT/PJ toggle on a 360 px phone. */
+  font-size: clamp(22px, 6vw, 28px);
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 svg.logo {
-  width: 36px;
-  height: 36px;
+  width: clamp(36px, 10vw, 44px);
+  height: clamp(36px, 10vw, 44px);
   flex: none;
 }
 
 .tagline {
-  margin-top: 6px;
-  font-size: 15px;
+  margin-top: 12px;
+  font-size: 17px;
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
 /* CLT/PJ: a white cloud with a black outline. */
@@ -81,7 +92,7 @@ svg.logo {
 
 /* Sea */
 .layout {
-  max-width: 1080px;
+  max-width: var(--column);
   margin: -56px auto 0;
   padding: 0 16px 48px;
   display: grid;
@@ -106,10 +117,10 @@ svg.logo {
   align-items: baseline;
   gap: 12px;
   margin: 0;
-  padding: 10px 20px;
+  padding: 14px 20px;
   background: var(--palm);
   color: var(--coconut);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -445,7 +456,7 @@ h2 {
 
 .form h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -500,12 +511,12 @@ h2 {
 
 h3 {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .extra {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -578,11 +589,6 @@ h3 {
 .fine {
   margin: 24px 0 0;
   font-size: 13px;
-}
-
-/* Before the first click: one centred column. */
-.layout:not(.revealed) {
-  max-width: 472px;
 }
 
 @media (min-width: 960px) {

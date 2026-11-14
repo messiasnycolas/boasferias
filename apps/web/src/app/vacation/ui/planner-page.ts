@@ -42,7 +42,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
   templateUrl: './planner-page.html',
   styleUrl: './planner-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(window:scroll)': 'onScroll()' },
+  host: { '(window:scroll)': 'onScroll()', '[class.revealed]': 'revealed()' },
 })
 export class PlannerPage {
   /** Compared by content, so a click that changes nothing does not recompute. */
