@@ -10,6 +10,12 @@ on:
 permissions:
   contents: read
 
+# One run per branch at a time, in push order, so an older run can never deploy after a newer
+# one. On main the newest waiting run replaces older waiting ones; PRs cancel stale runs.
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   gate:
     runs-on: ubuntu-latest
