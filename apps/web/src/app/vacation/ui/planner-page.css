@@ -2,12 +2,15 @@
    hidden address bar, which made the first screen scroll. */
 :host {
   display: block;
-  /* Header and main share one column: the form's width before the first click, wider after. */
+  /* Header and main share one column: the form's width, and wider on desktop once the plans show. */
   --column: 472px;
 }
 
-:host(.revealed) {
-  --column: 1080px;
+/* Wider only where form and plans sit side by side; below that, plans stack under the same column. */
+@media (min-width: 960px) {
+  :host(.revealed) {
+    --column: 1080px;
+  }
 }
 
 /* Sky */

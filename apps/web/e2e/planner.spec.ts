@@ -141,6 +141,14 @@ test.describe('before the first click', () => {
     await expect(section.locator('.holidays li').first()).toBeVisible();
   });
 
+  test('a phone in landscape keeps the form width when the plans appear', async ({ page }) => {
+    await page.setViewportSize({ width: 833, height: 384 });
+    const width = () => page.locator('form').evaluate((form) => form.getBoundingClientRect().width);
+    const before = await width();
+    await showPlans(page);
+    expect(await width()).toBe(before);
+  });
+
   test('centres the form on desktop, then shows form and plans side by side', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const form = (await page.locator('form').boundingBox())!;
