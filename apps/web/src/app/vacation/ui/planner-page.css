@@ -1,6 +1,7 @@
+/* No min-height: the sea on <html> already fills any screen, and 100vh on phones counts the
+   hidden address bar, which made the first screen scroll. */
 :host {
   display: block;
-  min-height: 100vh;
 }
 
 /* Sky */

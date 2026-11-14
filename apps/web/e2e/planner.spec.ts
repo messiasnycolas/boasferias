@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page, expect, test } from '@playwright/test';
+import { inflateSync } from 'node:zlib';
 
 const firstPlan = (page: Page) => page.locator('.plan').first();
 
@@ -21,6 +22,21 @@ const widest = (page: Page) =>
     ),
   );
 
+/** RGB of a 1x1 PNG screenshot (no image library needed). */
+const rgbOf = (png: Buffer) => {
+  const chunks: Buffer[] = [];
+  for (let at = 8; at < png.length;) {
+    const length = png.readUInt32BE(at);
+    if (png.toString('ascii', at + 4, at + 8) === 'IDAT')
+      chunks.push(png.subarray(at + 8, at + 8 + length));
+    at += length + 12;
+  }
+  const row = inflateSync(Buffer.concat(chunks));
+  return `rgb(${row[1]}, ${row[2]}, ${row[3]})`;
+};
+
+const SEA = 'rgb(13, 59, 92)';
+
 test.describe('before the first click', () => {
   test('taps show no blue browser highlight', async ({ page }) => {
     const color = await page.evaluate(
@@ -28,6 +44,31 @@ test.describe('before the first click', () => {
     );
     expect(color).toBe('rgba(0, 0, 0, 0)');
   });
+
+  test('is only as tall as its content on a phone', async ({ page }) => {
+    const formBottom = await page
+      .locator('form')
+      .evaluate((form) => form.getBoundingClientRect().bottom + scrollY);
+    // The body, not the document: a document is never shorter than the window.
+    const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
+    expect(height - formBottom).toBeLessThanOrEqual(48); // the layout's bottom padding
+  });
+
+  for (const size of [
+    { width: 1920, height: 1080 },
+    { width: 3840, height: 2160 },
+  ]) {
+    test(`fills a ${size.width}x${size.height} screen with sea, no gap`, async ({ page }) => {
+      await page.setViewportSize(size);
+      for (const x of [0, size.width / 2, size.width - 1]) {
+        const pixel = await page.screenshot({
+          clip: { x, y: size.height - 1, width: 1, height: 1 },
+          scale: 'css',
+        });
+        expect(rgbOf(pixel), `bottom pixel at x=${x}`).toBe(SEA);
+      }
+    });
+  }
 
   test('hides the plans until asked, then shows and focuses them', async ({ page }) => {
     await page.waitForTimeout(600); // the background computation has finished
