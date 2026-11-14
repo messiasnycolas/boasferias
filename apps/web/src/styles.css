@@ -16,6 +16,8 @@
   --trunk: #5a3a24;
   --husk: #3a2416;
   --coconut: #fffaf0;
+  /* Halfway sand-to-coconut in OKLab: flat boxes inside a grained card (periods, legend, months). */
+  --sand-light: #f9eed8;
   --sun: #f7b32b;
   --ink: #14181d;
   --muted: #4f4636;

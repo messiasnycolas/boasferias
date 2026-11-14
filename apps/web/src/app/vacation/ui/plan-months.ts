@@ -14,14 +14,17 @@ const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   selector: 'app-plan-months',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ul class="legend" [class.long]="hasCounted()">
-      <li><i class="swatch vacation"></i>Férias</li>
-      <li><i class="swatch off"></i>Descanso</li>
-      @if (hasCounted()) {
-        <li><i class="swatch counted"></i>Contado como férias pela CLT</li>
-      }
-      <li><b class="holiday-mark">12</b>Feriado ou licença</li>
-    </ul>
+    <div class="legend-box">
+      <p class="legend-title" aria-hidden="true">Legenda</p>
+      <ul class="legend" aria-label="Legenda" [class.long]="hasCounted()">
+        <li><i class="swatch vacation"></i>Férias</li>
+        <li><i class="swatch off"></i>Descanso</li>
+        @if (hasCounted()) {
+          <li><i class="swatch counted"></i>Contado como férias pela CLT</li>
+        }
+        <li><b class="holiday-mark">12</b>Feriado ou licença</li>
+      </ul>
+    </div>
     <div class="months">
       @for (month of months(); track month.year * 100 + month.month) {
         <section class="month" [attr.aria-label]="name(month)">
