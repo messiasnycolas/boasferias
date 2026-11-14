@@ -206,23 +206,45 @@
         <fieldset class="field stacked">
           <legend>Licença ou banco de horas</legend>
           <p class="hint">Dias que você já tem livres, como licença ou banco de horas.</p>
-          <div class="add">
-            <label class="visually-hidden" for="dayoff">Data da licença ou banco de horas</label>
-            <app-date-field
-              inputId="dayoff"
-              [value]="newDayOff()"
-              (valueChange)="newDayOff.set($event)"
-            />
-            <button type="button" class="secondary" [disabled]="!newDayOff()" (click)="addDayOff()">
-              Adicionar
-            </button>
+          <div class="dates">
+            <div class="field stacked">
+              <label for="leave-start">Primeiro dia</label>
+              <app-date-field
+                inputId="leave-start"
+                [value]="leaveStart()"
+                (valueChange)="leaveStart.set($event)"
+              />
+            </div>
+            <div class="field stacked">
+              <label for="leave-end">Último dia (opcional)</label>
+              <app-date-field
+                inputId="leave-end"
+                [value]="leaveEnd()"
+                (valueChange)="leaveEnd.set($event)"
+              />
+            </div>
           </div>
-          @if (form().extraDaysOff.length) {
+          @if (leaveError(); as message) {
+            <p class="hint error" role="alert">{{ message }}</p>
+          }
+          <button
+            type="button"
+            class="secondary add-leave"
+            [disabled]="!leaveDays()"
+            (click)="addLeave()"
+          >
+            Adicionar
+          </button>
+          @if (leaveRuns().length) {
             <ul class="holidays">
-              @for (date of form().extraDaysOff; track date) {
+              @for (run of leaveRuns(); track run.start) {
                 <li>
-                  <span>{{ formatDate(date) }}</span>
-                  <button type="button" class="link" (click)="removeDayOff(date)">Remover</button>
+                  <span>{{
+                    run.start === run.end ? formatDay(run.start) : formatRange(run.start, run.end)
+                  }}</span>
+                  <button type="button" class="link" (click)="removeLeave(run.days)">
+                    Remover
+                  </button>
                 </li>
               }
             </ul>

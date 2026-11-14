@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
+import { LeaveError, expandLeave, groupLeave } from '../application/leave-days';
 import { planCalendar } from '../application/plan-calendar';
 import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
 import {
@@ -32,6 +33,11 @@ import { PlannerClient } from './planner-client';
 type WeekPreset = keyof typeof WORK_WEEKS | 'custom';
 
 const RECOMPUTE_DELAY_MS = 250;
+const LEAVE_MESSAGES: Record<LeaveError, string> = {
+  'invalid-date': 'Confira a data.',
+  'end-before-start': 'O último dia vem antes do primeiro.',
+  'too-long': 'Adicione até 60 dias por vez.',
+};
 const MORE_PLANS_STEP = 5;
 const WEEKDAY_CHIPS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
@@ -59,7 +65,21 @@ export class PlannerPage {
   private readonly resultInput = signal<SuggestInput | null>(null);
   protected readonly selected = signal(0);
   protected readonly customWeek = signal(false);
-  protected readonly newDayOff = signal('');
+  /** "Licença ou banco de horas": first day required, last day optional (a range). */
+  protected readonly leaveStart = signal('');
+  protected readonly leaveEnd = signal('');
+  private readonly leave = computed(() =>
+    this.leaveStart() ? expandLeave(this.leaveStart(), this.leaveEnd()) : null,
+  );
+  protected readonly leaveDays = computed(() => {
+    const leave = this.leave();
+    return leave?.ok ? leave.days : null;
+  });
+  protected readonly leaveError = computed(() => {
+    const leave = this.leave();
+    return leave && !leave.ok ? LEAVE_MESSAGES[leave.error] : null;
+  });
+  protected readonly leaveRuns = computed(() => groupLeave(this.form().extraDaysOff));
 
   protected readonly weekChips = WEEKDAY_CHIPS;
   protected readonly weekNames = WEEKDAY_NAMES;
@@ -179,16 +199,17 @@ export class PlannerPage {
     });
   }
 
-  protected addDayOff(): void {
-    const date = this.newDayOff();
-    if (date && !this.form().extraDaysOff.includes(date)) {
-      this.patch({ extraDaysOff: [...this.form().extraDaysOff, date].sort() });
-    }
-    this.newDayOff.set('');
+  protected addLeave(): void {
+    const days = this.leaveDays();
+    if (!days) return;
+    const all = new Set([...this.form().extraDaysOff, ...days]);
+    this.patch({ extraDaysOff: [...all].sort() });
+    this.leaveStart.set('');
+    this.leaveEnd.set('');
   }
 
-  protected removeDayOff(date: string): void {
-    this.patch({ extraDaysOff: this.form().extraDaysOff.filter((d) => d !== date) });
+  protected removeLeave(days: readonly string[]): void {
+    this.patch({ extraDaysOff: this.form().extraDaysOff.filter((d) => !days.includes(d)) });
   }
 
   protected showResults(): void {

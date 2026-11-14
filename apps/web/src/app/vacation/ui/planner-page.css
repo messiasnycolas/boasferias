@@ -383,14 +383,13 @@ svg {
   color: var(--holiday);
 }
 
-.add {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.add-leave {
+  justify-self: start;
 }
 
-.add app-date-field {
-  flex: 1 1 11.5rem;
+.hint.error {
+  color: var(--holiday);
+  font-weight: 600;
 }
 
 button.link {

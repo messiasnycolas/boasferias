@@ -190,7 +190,7 @@ test.describe('with the plans shown', () => {
 
     const afterRemoval = await firstPlan(page).innerText();
     await page.getByText('Mais filtros').click();
-    await page.getByLabel('Data da licença ou banco de horas').fill('09/02/2027');
+    await page.getByLabel('Primeiro dia').fill('09/02/2027');
     await page.getByRole('button', { name: 'Adicionar' }).click();
     await expect(firstPlan(page)).not.toHaveText(afterRemoval);
   });
@@ -223,6 +223,34 @@ test.describe('with the plans shown', () => {
     await page.getByLabel('Começar a partir de').fill('01032027');
     await expect(page.getByLabel('Começar a partir de')).toHaveValue('01/03/2027');
     await expect(firstPlan(page)).not.toHaveText(before);
+  });
+
+  test('adds a leave range like a flight search: first day required, last day optional', async ({
+    page,
+  }) => {
+    await page.getByText('Mais filtros').click();
+    const add = page.getByRole('button', { name: 'Adicionar' });
+    await expect(add).toBeDisabled();
+
+    await page.getByLabel('Primeiro dia').fill('12/02/2027');
+    await page.getByLabel('Último dia (opcional)').fill('09/02/2027');
+    await expect(page.getByRole('alert')).toHaveText('O último dia vem antes do primeiro.');
+    await expect(add).toBeDisabled();
+
+    const before = await firstPlan(page).innerText();
+    await page.getByLabel('Primeiro dia').fill('09/02/2027');
+    await page.getByLabel('Último dia (opcional)').fill('12/02/2027');
+    await add.click();
+    const leave = page
+      .locator('fieldset', { hasText: 'Licença ou banco de horas' })
+      .getByRole('listitem');
+    await expect(leave).toHaveCount(1);
+    await expect(leave).toContainText('9–12 fev');
+    await expect(firstPlan(page)).not.toHaveText(before);
+    await expect(page.getByLabel('Primeiro dia')).toHaveValue('');
+
+    await leave.getByRole('button', { name: 'Remover' }).click();
+    await expect(leave).toHaveCount(0);
   });
 
   test('opening another plan on the calendar scrolls to that calendar', async ({ page }) => {

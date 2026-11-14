@@ -9,7 +9,7 @@
 | Dias extras                      | extra days                     | Days off minus days spent                                                                                     |
 | Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ: workdays                                                                |
 | Feriado                          | holiday                        | Default list in `calendar`; the user can remove or add days                                                   |
-| Licença ou banco de horas        | extra day off (`extraDaysOff`) | A day the user already has free and adds by hand (leave, time bank). City holidays wait for the city selector |
+| Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. City holidays wait for the city selector |
 | Ponte / emenda                   | bridge                         | Taking workdays between days off to join them                                                                 |
 | Repouso semanal remunerado (DSR) | rest day                       | Weekly paid rest, Sunday by default                                                                           |
 | Período concessivo               | concession period / deadline   | 12 months in which the employer must grant the vacation                                                       |
