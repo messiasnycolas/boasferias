@@ -20,7 +20,16 @@ From `apps/web`:
 | `npm run lint` | ESLint (angular-eslint) |
 | `npm run format:check` | Prettier (`npm run format` fixes) |
 | `npm run build` | Prerendered output in `dist/web/browser` |
+| `npm run e2e` | Playwright + axe on the built page (`npm run build` first); main journey, states, 360 px, 44 px targets |
 | `npx @lhci/cli@0.16.1 autorun` | Lighthouse budgets from `lighthouserc.json` (needs Chrome; runs in CI) |
+
+Without Chrome's system libraries (WSL), run browser checks in Playwright's image:
+
+```sh
+docker run --rm --ipc=host -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test
+```
+
+The planner runs in a Web Worker (`src/app/vacation/ui/planner.worker.ts`); the UI calls only `vacation/application`.
 
 ## Deploy
 

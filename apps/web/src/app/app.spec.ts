@@ -1,11 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { routes } from './app.routes';
 
 describe('App', () => {
-  it('renders the product name as the page heading', async () => {
+  it('serves the planner on the home route', async () => {
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    const page = fixture.nativeElement as HTMLElement;
-    expect(page.querySelector('h1')?.textContent).toBe('Boas Férias');
+    expect(routes[0].path).toBe('');
+    expect(fixture.nativeElement.querySelector('router-outlet')).not.toBeNull();
   });
 });

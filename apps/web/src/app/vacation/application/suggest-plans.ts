@@ -1,5 +1,5 @@
 import { DayNumber, parseIsoDate, toIsoDate, yearOf } from '../../calendar/domain/calendar-date';
-import { holidays } from '../../calendar/domain/holidays';
+import { Holiday, holidays } from '../../calendar/domain/holidays';
 import {
   CLT_MAX_DAYS,
   CLT_MAX_PERIODS,
@@ -16,6 +16,12 @@ export const MAX_LIMIT = 20;
 const WEEKDAYS = 7;
 
 export type Mode = 'clt' | 'pj';
+
+/** Input ranges per mode, for the form. */
+export const LIMITS: Record<Mode, { days: [number, number]; periods: [number, number] }> = {
+  clt: { days: [CLT_SHORT_PERIOD, CLT_MAX_DAYS], periods: [1, CLT_MAX_PERIODS] },
+  pj: { days: [1, PJ_MAX_DAYS], periods: [1, PJ_MAX_PERIODS] },
+};
 
 export interface SuggestInput {
   mode: Mode;
@@ -102,6 +108,26 @@ function toPeriodView(c: Period): PeriodView {
   };
 }
 
+/** Default holidays around [from, to] and the resulting work calendar, after the user's changes. */
+export function holidayContext(
+  input: Pick<SuggestInput, 'workWeek'>,
+  from: DayNumber,
+  to: DayNumber,
+  removed: readonly DayNumber[],
+  extra: readonly DayNumber[],
+): { defaults: Holiday[]; daysOff: DaysOff } {
+  // One year of margin: blocks of days off may reach past the window.
+  const defaults: Holiday[] = [];
+  for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
+    defaults.push(...holidays(year));
+  const removedSet = new Set(removed);
+  const daysOff = new DaysOff(input.workWeek, [
+    ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
+    ...extra,
+  ]);
+  return { defaults, daysOff };
+}
+
 /** Ranked vacation plans for a CLT or PJ worker, with the default holidays in the window. */
 export function suggestPlans(input: SuggestInput): SuggestResult {
   const [from, to] = [parseIsoDate(input.earliestStart), parseIsoDate(input.deadline)];
@@ -112,16 +138,7 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
   const error = validate(input, from, to);
   if (error) return { ok: false, error };
 
-  // One year of margin: blocks of days off may reach past the window.
-  const defaults = [];
-  for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
-    defaults.push(...holidays(year));
-  const removedSet = new Set(removed);
-  const daysOff = new DaysOff(input.workWeek, [
-    ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
-    ...extra,
-  ]);
-
+  const { defaults, daysOff } = holidayContext(input, from, to, removed, extra);
   const clt = input.mode === 'clt';
   const units = clt ? enjoyedDays(input.days, input.sellThird) : input.days;
   const plans = rankPlans({

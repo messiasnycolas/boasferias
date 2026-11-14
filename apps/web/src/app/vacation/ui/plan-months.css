@@ -1,0 +1,114 @@
+.months {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dow {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.day,
+.pad {
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.day.vacation {
+  background: var(--accent);
+  color: #fff;
+}
+
+.day.off {
+  background: var(--accent-soft);
+}
+
+/* Hatched, not only coloured: readable without colour vision. */
+.day.counted {
+  background: repeating-linear-gradient(135deg, var(--accent) 0 4px, var(--accent-deep) 4px 8px);
+  color: #fff;
+}
+
+.day.cap-start {
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+.day.cap-end {
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.day.holiday {
+  color: var(--holiday);
+  text-decoration: underline 2px;
+  text-underline-offset: 4px;
+}
+
+.day.holiday.vacation,
+.day.holiday.counted {
+  color: #fff;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.swatch {
+  width: 22px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.swatch.vacation {
+  background: var(--accent);
+}
+
+.swatch.off {
+  background: var(--accent-soft);
+}
+
+.swatch.counted {
+  background: repeating-linear-gradient(135deg, var(--accent) 0 4px, var(--accent-deep) 4px 8px);
+}
+
+.holiday-mark {
+  color: var(--holiday);
+  text-decoration: underline 2px;
+  text-underline-offset: 3px;
+}

@@ -31,6 +31,8 @@ jobs:
       - run: npm test -- --watch=false
       - run: npm run build
       - run: npm audit --audit-level=high
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
       # Run via npx so its dependency tree stays out of the app's audit.
       - run: npx -y @lhci/cli@0.16.1 autorun
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
