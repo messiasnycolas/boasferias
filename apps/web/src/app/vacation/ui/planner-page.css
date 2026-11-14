@@ -94,7 +94,7 @@ svg.logo {
 .layout {
   max-width: var(--column);
   margin: -56px auto 0;
-  padding: 0 16px 48px;
+  padding: 0 16px 24px;
   display: grid;
   gap: 24px;
 }

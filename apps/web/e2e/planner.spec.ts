@@ -61,7 +61,7 @@ test.describe('before the first click', () => {
       .evaluate((form) => form.getBoundingClientRect().bottom + scrollY);
     // The body, not the document: a document is never shorter than the window.
     const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
-    expect(height - formBottom).toBeLessThanOrEqual(48); // the layout's bottom padding
+    expect(height - formBottom).toBeLessThanOrEqual(24); // the layout's bottom padding
   });
 
   for (const size of [
@@ -342,7 +342,7 @@ test.describe('with the plans shown', () => {
     expect(await page.evaluate(() => document.body.dataset['recomputed'])).toBeUndefined();
   });
 
-  for (const width of [320, 360]) {
+  for (const width of [320, 360, 384, 412]) {
     test.describe(`on a ${width} px phone`, () => {
       test.use({ viewport: { width, height: 800 } });
 
