@@ -39,6 +39,15 @@ const rgbOf = (png: Buffer) => {
 const isSea = ([r, g, b]: number[]) => r <= 25 && g >= 35 && g <= 95 && b >= 60 && b <= 140;
 
 test.describe('before the first click', () => {
+  test('raised buttons are filled with coconut shell, so the trunk never shows through', async ({
+    page,
+  }) => {
+    const fill = await page
+      .getByRole('button', { name: 'Ver melhores datas' })
+      .evaluate((button) => getComputedStyle(button).backgroundColor);
+    expect(fill).toBe('rgb(58, 36, 22)');
+  });
+
   test('taps show no blue browser highlight', async ({ page }) => {
     const color = await page.evaluate(
       () => getComputedStyle(document.querySelector('button')!).webkitTapHighlightColor,

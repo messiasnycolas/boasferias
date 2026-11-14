@@ -107,7 +107,9 @@ svg.logo {
 .card {
   border-radius: var(--radius);
   overflow: hidden;
-  background: var(--sand);
+  background:
+    var(--sand-texture) 0 0 / 220px 220px,
+    var(--sand);
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
 }
 
@@ -118,7 +120,10 @@ svg.logo {
   gap: 12px;
   margin: 0;
   padding: 14px 20px;
-  background: var(--palm);
+  background:
+    var(--palm-texture) left top / 1200px 80px no-repeat,
+    var(--palm);
+  text-shadow: 0 1px 1px rgb(0 0 0 / 15%);
   color: var(--coconut);
   font-size: 18px;
   font-weight: 700;
@@ -421,7 +426,8 @@ button.link {
   padding: 10px 14px;
   border: 2px solid var(--sand);
   border-radius: 10px;
-  background: transparent;
+  /* Coconut shell inside: the button reads as its own piece on the trunk. */
+  background: var(--husk);
   color: var(--sand);
   font-size: 16px;
   font-weight: 800;
@@ -433,7 +439,7 @@ button.link {
 }
 
 .raised:hover {
-  background: rgb(243 226 191 / 10%);
+  background: color-mix(in oklab, var(--husk), var(--sand) 10%);
 }
 
 .raised[aria-disabled='true'] {

@@ -14,6 +14,7 @@
   --line: #dcc597;
   --edge: #8a7350;
   --trunk: #5a3a24;
+  --husk: #3a2416;
   --coconut: #fffaf0;
   --sun: #f7b32b;
   --ink: #14181d;
@@ -21,6 +22,10 @@
   --holiday: #a2301a;
   --focus: var(--ink);
   --radius: 18px;
+  /* Palm frond stripes for card heads (1200x80, wider than any head). */
+  --palm-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='80'%3E%3Cdefs%3E%3Cpattern id='f' width='12' height='12' patternUnits='userSpaceOnUse' patternTransform='rotate(-35)'%3E%3Crect width='12' height='12' fill='%232d6a3e'/%3E%3Crect width='5' height='12' fill='%23327044'/%3E%3Cpath d='M5 0v12' stroke='%231d4729' stroke-width='.7'/%3E%3Cpath d='M2.4 0v12' stroke='%23357447' stroke-width='.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='1200' height='80' fill='url(%23f)'/%3E%3C/svg%3E");
+  /* Fine sand grain for card bodies; tileable noise. */
+  --sand-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36  0 0 0 0 0.27  0 0 0 0 0.13  0.55 0 0 0 -0.2'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   color-scheme: light;
 }
 
