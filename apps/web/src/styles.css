@@ -26,6 +26,8 @@
 }
 
 html {
+  /* No blue tap flash on Android; controls show their own pressed state. */
+  -webkit-tap-highlight-color: transparent;
   background: var(--sea);
   scrollbar-color: var(--sand) var(--sea);
 }

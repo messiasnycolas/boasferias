@@ -22,6 +22,13 @@ const widest = (page: Page) =>
   );
 
 test.describe('before the first click', () => {
+  test('taps show no blue browser highlight', async ({ page }) => {
+    const color = await page.evaluate(
+      () => getComputedStyle(document.querySelector('button')!).webkitTapHighlightColor,
+    );
+    expect(color).toBe('rgba(0, 0, 0, 0)');
+  });
+
   test('hides the plans until asked, then shows and focuses them', async ({ page }) => {
     await page.waitForTimeout(600); // the background computation has finished
     await expect(page.getByRole('heading', { name: 'Melhores planos' })).toHaveCount(0);
