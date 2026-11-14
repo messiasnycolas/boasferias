@@ -26,6 +26,7 @@ import {
   tieNote,
   todayIso,
 } from './format';
+import { BackToTop } from './back-to-top';
 import { DateField } from './date-field';
 import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
@@ -44,7 +45,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
 
 @Component({
   selector: 'app-planner-page',
-  imports: [DateField, PlanMonths],
+  imports: [BackToTop, DateField, PlanMonths],
   templateUrl: './planner-page.html',
   styleUrl: './planner-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,37 @@
+/* Back to top: a volleyball with a hand-drawn arrow, once the page is a screen down. */
+:host button {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 8px);
+  z-index: 10;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  filter: drop-shadow(0 6px 8px rgb(0 0 0 / 35%));
+  cursor: pointer;
+  animation: bounce-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--coconut);
+}
+
+@keyframes bounce-in {
+  from {
+    transform: translateY(24px) scale(0.6);
+    opacity: 0;
+  }
+}

@@ -110,6 +110,27 @@ test.describe('before the first click', () => {
     for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(16);
   });
 
+  test('shared links describe the page with descanso, never folga', async ({ page }) => {
+    for (const selector of ['meta[name="description"]', 'meta[property="og:description"]']) {
+      const text = await page.locator(selector).getAttribute('content');
+      expect(text, selector).toContain('descanso');
+      expect(text, selector).not.toMatch(/folga/i);
+    }
+  });
+
+  test('removing a holiday turns its × into a + by rotating the icon', async ({ page }) => {
+    await page.getByText('Feriados no período').click();
+    const remove = page.getByRole('button', { name: 'Remover Tiradentes' });
+    await remove.click();
+    const restore = page.getByRole('button', { name: 'Considerar Tiradentes' });
+    await expect(restore).toBeVisible();
+    await expect
+      .poll(() => restore.locator('svg').evaluate((svg) => getComputedStyle(svg).transform))
+      .toBe('matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)');
+    await restore.click();
+    await expect(page.getByRole('button', { name: 'Remover Tiradentes' })).toBeVisible();
+  });
+
   test('lists the holidays in their own closed section', async ({ page }) => {
     const section = page.locator('details', { hasText: 'Feriados no período' });
     await expect(section).not.toHaveAttribute('open');
