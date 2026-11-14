@@ -578,6 +578,7 @@ h3 {
 
 .plan.selected app-plan-months {
   display: block;
+  scroll-margin-top: 16px;
   margin-top: 16px;
   animation: draw 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }

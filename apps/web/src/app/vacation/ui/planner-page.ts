@@ -116,6 +116,7 @@ export class PlannerPage {
   private readonly formTitle = viewChild.required<ElementRef<HTMLElement>>('formTitle');
   private readonly client = isPlatformBrowser(inject(PLATFORM_ID)) ? new PlannerClient() : null;
   private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
@@ -199,14 +200,26 @@ export class PlannerPage {
     afterNextRender(() => this.results()?.nativeElement.focus(), { injector: this.injector });
   }
 
+  /** Opens a plan on the calendar and brings that calendar to the top of the screen. */
+  protected openCalendar(index: number): void {
+    this.selected.set(index);
+    afterNextRender(
+      () => {
+        const plan = this.host.nativeElement.querySelectorAll('.plan').item(index);
+        const calendar = plan?.querySelector('app-plan-months');
+        calendar?.scrollIntoView({ block: 'start', behavior: smoothUnlessReduced() });
+      },
+      { injector: this.injector },
+    );
+  }
+
   protected onScroll(): void {
     this.scrolledDown.set(window.scrollY > window.innerHeight);
   }
 
   /** Scrolls up and moves focus to the form, so keyboard users land there too. */
   protected backToTop(): void {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    window.scrollTo({ top: 0, behavior: smoothUnlessReduced() });
     this.formTitle().nativeElement.focus({ preventScroll: true });
   }
 
@@ -235,4 +248,8 @@ export class PlannerPage {
 /** True when two inputs differ at most in how many plans they ask for. */
 function sameExceptLimit(a: SuggestInput, b: SuggestInput | null): boolean {
   return !!b && JSON.stringify({ ...a, limit: 0 }) === JSON.stringify({ ...b, limit: 0 });
+}
+
+function smoothUnlessReduced(): ScrollBehavior {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 }

@@ -225,6 +225,19 @@ test.describe('with the plans shown', () => {
     await expect(firstPlan(page)).not.toHaveText(before);
   });
 
+  test('opening another plan on the calendar scrolls to that calendar', async ({ page }) => {
+    const planB = page.locator('.plan').nth(1);
+    await planB.getByRole('button', { name: 'Ver no calendário' }).click();
+    const calendar = planB.locator('app-plan-months');
+    await expect(calendar).toBeVisible();
+    await expect
+      .poll(() => calendar.evaluate((el) => Math.round(el.getBoundingClientRect().top)))
+      .toBeGreaterThanOrEqual(0);
+    await expect
+      .poll(() => calendar.evaluate((el) => Math.round(el.getBoundingClientRect().top)))
+      .toBeLessThanOrEqual(40);
+  });
+
   test('a volleyball takes you back to the top', async ({ page }) => {
     const ball = page.getByRole('button', { name: 'Voltar ao topo' });
     await expect(ball).toHaveCount(0);
