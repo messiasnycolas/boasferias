@@ -33,7 +33,10 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlannerPage {
-  protected readonly form = signal<SuggestInput>(defaultInput('clt', todayIso()));
+  /** Compared by content, so a click that changes nothing does not recompute. */
+  protected readonly form = signal<SuggestInput>(defaultInput('clt', todayIso()), {
+    equal: (a, b) => JSON.stringify(a) === JSON.stringify(b),
+  });
   protected readonly limits = computed(() => LIMITS[this.form().mode]);
   protected readonly loading = signal(false);
   protected readonly result = signal<SuggestResult | null>(null);
@@ -111,6 +114,7 @@ export class PlannerPage {
   }
 
   protected setMode(mode: Mode): void {
+    if (mode === this.form().mode) return;
     const { workWeek, removedHolidays, extraDaysOff } = this.form();
     this.form.set({ ...defaultInput(mode, todayIso()), workWeek, removedHolidays, extraDaysOff });
   }

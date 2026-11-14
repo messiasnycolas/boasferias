@@ -94,3 +94,24 @@ test('lays the legend out all in one row or all in one column, never mixed', asy
   await page.setViewportSize({ width: 360, height: 800 });
   expect(await layout()).toBe('column');
 });
+
+test('choosing the mode already selected keeps the input and does not recompute', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: 'Menos um dia' }).click();
+  await expect(page.locator('#days')).toHaveValue('29');
+  await page.waitForTimeout(400); // let the debounced recompute for 29 days start
+  await expect(page.locator('.results')).toHaveAttribute('aria-busy', 'false');
+
+  await page.evaluate(() => {
+    const results = document.querySelector('.results')!;
+    new MutationObserver(() => {
+      if (results.getAttribute('aria-busy') === 'true') document.body.dataset['recomputed'] = 'yes';
+    }).observe(results, { attributes: true });
+  });
+  await page.getByRole('radio', { name: 'CLT' }).click();
+  await page.waitForTimeout(600);
+
+  await expect(page.locator('#days')).toHaveValue('29');
+  expect(await page.evaluate(() => document.body.dataset['recomputed'])).toBeUndefined();
+});
