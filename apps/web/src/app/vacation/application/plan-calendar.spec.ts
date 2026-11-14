@@ -37,9 +37,9 @@ describe('defaultInput', () => {
     });
   });
 
-  it('lets PJ start tomorrow with 20 workdays', () => {
+  it('starts PJ a week ahead with 20 workdays', () => {
     const input = defaultInput('pj', '2027-01-10');
-    expect([input.days, input.earliestStart]).toEqual([20, '2027-01-11']);
+    expect([input.days, input.earliestStart]).toEqual([20, '2027-01-17']);
   });
 
   it('is always valid', () => {

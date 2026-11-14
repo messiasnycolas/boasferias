@@ -1,0 +1,65 @@
+:host {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  border: 1.5px solid var(--edge);
+  border-radius: 10px;
+  background: var(--coconut);
+}
+
+:host(:has(input[type='text']:focus)) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 0 0 12px;
+  border: 0;
+  background: none;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='text']::placeholder {
+  color: var(--muted);
+}
+
+/* The native picker sits under the button, so the browser anchors its calendar there. */
+.native {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 44px;
+  height: 44px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+button {
+  position: relative;
+  width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline-offset: -4px;
+  border-radius: 10px;
+}
+
+svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

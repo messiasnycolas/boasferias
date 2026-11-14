@@ -11,6 +11,8 @@ import { Mode, SuggestInput } from './suggest-plans';
 
 const DEFAULT_DAYS: Record<Mode, number> = { clt: 30, pj: 20 };
 const DEFAULT_MAX_PERIODS = 3;
+/** PJ has no notice rule; a week ahead leaves time to arrange the work. */
+const PJ_LEAD_DAYS = 7;
 /** Plans computed by default; the page can ask for more, up to MAX_LIMIT. */
 export const DEFAULT_LIMIT = 3;
 
@@ -28,7 +30,7 @@ export function defaultInput(mode: Mode, today: string): SuggestInput {
     days: DEFAULT_DAYS[mode],
     sellThird: false,
     maxPeriods: DEFAULT_MAX_PERIODS,
-    earliestStart: toIsoDate(mode === 'clt' ? cltEarliestStart(day) : addDays(day, 1)),
+    earliestStart: toIsoDate(mode === 'clt' ? cltEarliestStart(day) : addDays(day, PJ_LEAD_DAYS)),
     deadline: toIsoDate(deadline),
     workWeek: [...MON_FRI],
     removedHolidays: [],

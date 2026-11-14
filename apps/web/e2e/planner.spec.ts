@@ -111,7 +111,7 @@ test.describe('with the plans shown', () => {
 
     const afterRemoval = await firstPlan(page).innerText();
     await page.getByText('Mais filtros').click();
-    await page.getByLabel('Data da licença ou banco de horas').fill('2027-02-09');
+    await page.getByLabel('Data da licença ou banco de horas').fill('09/02/2027');
     await page.getByRole('button', { name: 'Adicionar' }).click();
     await expect(firstPlan(page)).not.toHaveText(afterRemoval);
   });
@@ -124,7 +124,7 @@ test.describe('with the plans shown', () => {
 
     await page.getByLabel('Dias de férias').fill('30');
     await page.getByText('Mais filtros').click();
-    await page.getByLabel('Terminar até').fill('2027-02-20');
+    await page.getByLabel('Terminar até').fill('20/02/2027');
     await expect(page.getByText('Nenhum plano cabe')).toBeVisible();
   });
 
@@ -132,6 +132,28 @@ test.describe('with the plans shown', () => {
     expect(page.workers().length).toBeGreaterThan(0);
     await page.getByRole('radio', { name: 'PJ' }).click();
     await expect(firstPlan(page)).toContainText('dias úteis');
+  });
+
+  test('shows and takes dates as dd/mm/aaaa, whatever the phone language', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    await expect(page.getByLabel('Começar a partir de')).toHaveValue('09/02/2027');
+    await page.getByRole('radio', { name: 'PJ' }).click();
+    await expect(page.getByLabel('Começar a partir de')).toHaveValue('17/01/2027'); // a week ahead
+
+    const before = await firstPlan(page).innerText();
+    await page.getByLabel('Começar a partir de').fill('01032027');
+    await expect(page.getByLabel('Começar a partir de')).toHaveValue('01/03/2027');
+    await expect(firstPlan(page)).not.toHaveText(before);
+  });
+
+  test('a volleyball takes you back to the top', async ({ page }) => {
+    const ball = page.getByRole('button', { name: 'Voltar ao topo' });
+    await expect(ball).toHaveCount(0);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await ball.click();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.getByRole('heading', { name: 'Suas férias' })).toBeFocused();
+    await expect(ball).toHaveCount(0);
   });
 
   test('lays the legend out all in one row or all in one column, never mixed', async ({ page }) => {
@@ -195,21 +217,6 @@ test.describe('with the plans shown', () => {
         for (const button of await page.locator('button:visible, summary').all()) {
           const box = await button.boundingBox();
           expect(box?.height, await button.innerText()).toBeGreaterThanOrEqual(44);
-        }
-      });
-
-      test('date pickers have room for their content', async ({ page }) => {
-        await page.getByText('Mais filtros').click();
-        for (const id of ['#start', '#deadline', '#dayoff']) {
-          const input = page.locator(id);
-          const needed = await input.evaluate((el) => {
-            const style = (el as HTMLElement).style;
-            style.width = 'min-content';
-            const width = el.getBoundingClientRect().width;
-            style.width = '';
-            return width;
-          });
-          expect(needed, id).toBeLessThanOrEqual((await input.boundingBox())!.width);
         }
       });
 

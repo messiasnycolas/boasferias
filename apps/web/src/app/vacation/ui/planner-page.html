@@ -21,7 +21,7 @@
           stroke="#d7263d"
           stroke-width="3"
         />
-        <path d="M41 66q9 7 18 0" stroke="#14181d" stroke-width="4" />
+        <path d="M36.5 64.5Q46 74 57 66" stroke="#14181d" stroke-width="4" />
       </svg>
       Boas Férias
     </h1>
@@ -49,7 +49,7 @@
 
 <main class="layout" [class.revealed]="revealed()">
   <form class="card form" (submit)="$event.preventDefault(); showResults()">
-    <h2 class="card-head">Suas férias</h2>
+    <h2 class="card-head" #formTitle tabindex="-1">Suas férias</h2>
     <div class="card-body">
       <div class="field">
         <label for="days">{{
@@ -136,20 +136,18 @@
         <div class="dates">
           <div class="field stacked">
             <label for="start">Começar a partir de</label>
-            <input
-              id="start"
-              type="date"
+            <app-date-field
+              inputId="start"
               [value]="form().earliestStart"
-              (change)="patch({ earliestStart: $any($event.target).value })"
+              (valueChange)="patch({ earliestStart: $event })"
             />
           </div>
           <div class="field stacked">
             <label for="deadline">Terminar até</label>
-            <input
-              id="deadline"
-              type="date"
+            <app-date-field
+              inputId="deadline"
               [value]="form().deadline"
-              (change)="patch({ deadline: $any($event.target).value })"
+              (valueChange)="patch({ deadline: $event })"
             />
           </div>
         </div>
@@ -210,11 +208,10 @@
           <p class="hint">Dias que você já tem livres, como licença ou banco de horas.</p>
           <div class="add">
             <label class="visually-hidden" for="dayoff">Data da licença ou banco de horas</label>
-            <input
-              id="dayoff"
-              type="date"
+            <app-date-field
+              inputId="dayoff"
               [value]="newDayOff()"
-              (change)="newDayOff.set($any($event.target).value)"
+              (valueChange)="newDayOff.set($event)"
             />
             <button type="button" class="secondary" [disabled]="!newDayOff()" (click)="addDayOff()">
               Adicionar
@@ -352,3 +349,35 @@
     </section>
   }
 </main>
+
+@if (revealed() && scrolledDown()) {
+  <button type="button" class="to-top" aria-label="Voltar ao topo" (click)="backToTop()">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <radialGradient id="ball-shade" cx="0.36" cy="0.3" r="0.75">
+          <stop offset="0" stop-color="#fff" />
+          <stop offset="0.5" stop-color="#f4f2ee" />
+          <stop offset="0.82" stop-color="#dcd8d0" />
+          <stop offset="1" stop-color="#b8b2a8" />
+        </radialGradient>
+        <clipPath id="ball-clip"><circle cx="32" cy="32" r="27" /></clipPath>
+      </defs>
+      <circle cx="32" cy="32" r="27" fill="url(#ball-shade)" />
+      <g clip-path="url(#ball-clip)" fill="none" stroke="#b3ada1" stroke-width="0.75">
+        <path d="M37 37C33 27 29 16 21 5.5" />
+        <path d="M37 37C45 33 53 27 60 18" />
+        <path d="M37 37C36 46 34 54 31 61" />
+        <path d="M15 8.5C24 22 27 42 23 60" />
+        <path d="M9 15.5C16 28 18 44 14 56.5" />
+        <path d="M32.6 26.2C41 24 50 19 57.5 12" />
+        <path d="M27.2 15C34 14 41 11 46.5 6" />
+        <path d="M36.2 45C45 44 53 40 60.5 33" />
+        <path d="M34 53.5C43 53 51 49 57.5 44" />
+      </g>
+      <g fill="none" stroke="#d7263d" stroke-width="4.2">
+        <path d="M31 48c1.2-5-1.4-9 .4-14.5 1-3.2.3-6.4.9-9.5" />
+        <path d="M23.5 29.5c2.6-2.2 5.5-5.6 7.9-8.7 2.3 3.3 4.9 6.3 8.3 8.4" />
+      </g>
+    </svg>
+  </button>
+}

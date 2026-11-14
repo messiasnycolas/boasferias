@@ -25,6 +25,7 @@ import {
   tieNote,
   todayIso,
 } from './format';
+import { DateField } from './date-field';
 import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
 
@@ -37,10 +38,11 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
 
 @Component({
   selector: 'app-planner-page',
-  imports: [PlanMonths],
+  imports: [DateField, PlanMonths],
   templateUrl: './planner-page.html',
   styleUrl: './planner-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(window:scroll)': 'onScroll()' },
 })
 export class PlannerPage {
   /** Compared by content, so a click that changes nothing does not recompute. */
@@ -51,6 +53,8 @@ export class PlannerPage {
   protected readonly loading = signal(false);
   /** Plans are computed in the background from the start, but shown only after the first click. */
   protected readonly revealed = signal(false);
+  /** More than a screen down: the back-to-top ball shows. */
+  protected readonly scrolledDown = signal(false);
   protected readonly result = signal<SuggestResult | null>(null);
   private readonly resultInput = signal<SuggestInput | null>(null);
   protected readonly selected = signal(0);
@@ -109,6 +113,7 @@ export class PlannerPage {
   });
 
   private readonly results = viewChild<ElementRef<HTMLElement>>('results');
+  private readonly formTitle = viewChild.required<ElementRef<HTMLElement>>('formTitle');
   private readonly client = isPlatformBrowser(inject(PLATFORM_ID)) ? new PlannerClient() : null;
   private readonly injector = inject(Injector);
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -192,6 +197,17 @@ export class PlannerPage {
     }
     this.revealed.set(true);
     afterNextRender(() => this.results()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  protected onScroll(): void {
+    this.scrolledDown.set(window.scrollY > window.innerHeight);
+  }
+
+  /** Scrolls up and moves focus to the form, so keyboard users land there too. */
+  protected backToTop(): void {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    this.formTitle().nativeElement.focus({ preventScroll: true });
   }
 
   /** "Empatado com os planos B e C", or null when no other shown plan has the same days off. */

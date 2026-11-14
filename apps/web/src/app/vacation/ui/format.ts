@@ -36,6 +36,27 @@ export function monthName(year: number, monthNumber: number): string {
   return `${name[0].toUpperCase()}${name.slice(1)} ${year}`;
 }
 
+/** "2026-11-17" -> "17/11/2026"; "" stays "". */
+export function toBrDate(iso: string): string {
+  return iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : '';
+}
+
+/** Keeps digits and inserts the slashes while typing: "1711" -> "17/11". */
+export function maskBrDate(text: string): string {
+  const digits = text.replace(/\D/g, '').slice(0, 8);
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)].filter(Boolean).join('/');
+}
+
+/** "17/11/2026" -> "2026-11-17"; null when incomplete or not a real day (31/02). */
+export function parseBrDate(text: string): string | null {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(text);
+  if (!match) return null;
+  const [, d, m, y] = match;
+  const date = new Date(Date.UTC(+y, +m - 1, +d));
+  const real = date.getUTCDate() === +d && date.getUTCMonth() === +m - 1;
+  return real ? `${y}-${m}-${d}` : null;
+}
+
 /** "A", "B" … "T": plans are named by letter so the page shows fewer numbers. */
 export function planLetter(index: number): string {
   return String.fromCharCode(65 + index);
