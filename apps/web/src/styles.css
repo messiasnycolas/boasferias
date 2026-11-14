@@ -1,18 +1,23 @@
 @import '@fontsource-variable/figtree';
 
 :root {
-  --ground: #fbe9de;
-  --shell: #2a1736;
-  --card: #ffffff;
-  --ink: #2a1736;
-  --muted: #6b5470;
-  --line: #ebd9ce;
-  --accent: #c9420c;
-  --accent-deep: #9e3208;
-  --accent-soft: #fde3d3;
-  --holiday: #c81e3a;
-  --focus: #5b3fd1;
-  --radius: 20px;
+  /* A beach read top to bottom: sky header, sea ground, palm/sand/trunk cards. */
+  --sky: #a8dcf3;
+  --sea: #0d3b5c;
+  --water: #0f6f8c;
+  --water-deep: #0a5266;
+  --palm: #2d6a3e;
+  --sand: #f3e2bf;
+  --line: #dcc597;
+  --edge: #8a7350;
+  --trunk: #5a3a24;
+  --coconut: #fffaf0;
+  --sun: #f7b32b;
+  --ink: #14181d;
+  --muted: #4f4636;
+  --holiday: #a2301a;
+  --focus: var(--ink);
+  --radius: 18px;
   color-scheme: light;
 }
 
@@ -21,8 +26,8 @@
 }
 
 html {
-  background: var(--ground);
-  scrollbar-color: var(--muted) var(--ground);
+  background: var(--sea);
+  scrollbar-color: var(--sand) var(--sea);
 }
 
 body {
@@ -31,13 +36,13 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
-  background: var(--ground);
+  background: var(--sea);
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--water);
   color: #fff;
 }
 
@@ -50,8 +55,8 @@ button,
 input {
   font: inherit;
   color: inherit;
-  accent-color: var(--accent);
-  caret-color: var(--accent);
+  accent-color: var(--water);
+  caret-color: var(--water);
 }
 
 .visually-hidden {

@@ -3,7 +3,9 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  Injector,
   PLATFORM_ID,
+  afterNextRender,
   computed,
   effect,
   inject,
@@ -39,6 +41,8 @@ export class PlannerPage {
   });
   protected readonly limits = computed(() => LIMITS[this.form().mode]);
   protected readonly loading = signal(false);
+  /** Plans are computed in the background from the start, but shown only after the first click. */
+  protected readonly revealed = signal(false);
   protected readonly result = signal<SuggestResult | null>(null);
   private readonly resultInput = signal<SuggestInput | null>(null);
   protected readonly selected = signal(0);
@@ -95,6 +99,7 @@ export class PlannerPage {
 
   private readonly results = viewChild<ElementRef<HTMLElement>>('results');
   private readonly client = isPlatformBrowser(inject(PLATFORM_ID)) ? new PlannerClient() : null;
+  private readonly injector = inject(Injector);
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
@@ -163,9 +168,12 @@ export class PlannerPage {
   }
 
   protected showResults(): void {
-    clearTimeout(this.timer);
-    this.compute(this.form());
-    this.results()?.nativeElement.focus();
+    if (this.resultInput() !== this.form()) {
+      clearTimeout(this.timer);
+      this.compute(this.form());
+    }
+    this.revealed.set(true);
+    afterNextRender(() => this.results()?.nativeElement.focus(), { injector: this.injector });
   }
 
   /** How many later plans tie with this one, counted only on the first of a tie group. */

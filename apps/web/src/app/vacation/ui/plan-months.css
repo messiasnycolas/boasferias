@@ -37,17 +37,17 @@ h4 {
 }
 
 .day.vacation {
-  background: var(--accent);
+  background: var(--water);
   color: #fff;
 }
 
 .day.off {
-  background: var(--accent-soft);
+  background: var(--sky);
 }
 
 /* Hatched, not only coloured: readable without colour vision. */
 .day.counted {
-  background: repeating-linear-gradient(135deg, var(--accent) 0 4px, var(--accent-deep) 4px 8px);
+  background: repeating-linear-gradient(135deg, var(--water) 0 4px, var(--water-deep) 4px 8px);
   color: #fff;
 }
 
@@ -107,15 +107,15 @@ h4 {
 }
 
 .swatch.vacation {
-  background: var(--accent);
+  background: var(--water);
 }
 
 .swatch.off {
-  background: var(--accent-soft);
+  background: var(--sky);
 }
 
 .swatch.counted {
-  background: repeating-linear-gradient(135deg, var(--accent) 0 4px, var(--accent-deep) 4px 8px);
+  background: repeating-linear-gradient(135deg, var(--water) 0 4px, var(--water-deep) 4px 8px);
 }
 
 .holiday-mark {
