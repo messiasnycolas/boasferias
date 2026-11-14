@@ -32,10 +32,11 @@ const rgbOf = (png: Buffer) => {
     at += length + 12;
   }
   const row = inflateSync(Buffer.concat(chunks));
-  return `rgb(${row[1]}, ${row[2]}, ${row[3]})`;
+  return [row[1], row[2], row[3]];
 };
 
-const SEA = 'rgb(13, 59, 92)';
+/** Any tone of our sea, from the light horizon to the deep bottom. */
+const isSea = ([r, g, b]: number[]) => r <= 25 && g >= 35 && g <= 95 && b >= 60 && b <= 140;
 
 test.describe('before the first click', () => {
   test('taps show no blue browser highlight', async ({ page }) => {
@@ -60,12 +61,20 @@ test.describe('before the first click', () => {
   ]) {
     test(`fills a ${size.width}x${size.height} screen with sea, no gap`, async ({ page }) => {
       await page.setViewportSize(size);
+      const bottom: number[][] = [];
       for (const x of [0, size.width / 2, size.width - 1]) {
         const pixel = await page.screenshot({
           clip: { x, y: size.height - 1, width: 1, height: 1 },
           scale: 'css',
         });
-        expect(rgbOf(pixel), `bottom pixel at x=${x}`).toBe(SEA);
+        bottom.push(rgbOf(pixel));
+      }
+      for (const rgb of bottom) expect(isSea(rgb), `bottom pixel ${rgb}`).toBe(true);
+      // Browsers dither gradients, so neighbours may differ by a shade or two.
+      for (const rgb of bottom) {
+        rgb.forEach((c, i) =>
+          expect(Math.abs(c - bottom[0][i]), 'even along the bottom').toBeLessThanOrEqual(2),
+        );
       }
     });
   }

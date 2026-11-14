@@ -2,8 +2,11 @@
 
 :root {
   /* A beach read top to bottom: sky header, sea ground, palm/sand/trunk cards. */
+  --sky-top: #e3f4fc;
   --sky: #a8dcf3;
+  --sea-light: #155a85;
   --sea: #0d3b5c;
+  --sea-deep: #082a42;
   --water: #0f6f8c;
   --water-deep: #0a5266;
   --palm: #2d6a3e;
@@ -28,7 +31,23 @@
 html {
   /* No blue tap flash on Android; controls show their own pressed state. */
   -webkit-tap-highlight-color: transparent;
-  background: var(--sea);
+  /* The sea gets deeper below the horizon: smoothstep in OKLab, precomputed into small steps so
+     no band shows. Past the gradient (long pages) it stays deep. */
+  --horizon: 11rem;
+  background-color: var(--sea-deep);
+  background-image: linear-gradient(
+    var(--sea-light) var(--horizon),
+    #145882 calc(var(--horizon) + 15vh),
+    #13527a calc(var(--horizon) + 30vh),
+    #114a6f calc(var(--horizon) + 45vh),
+    #0e4162 calc(var(--horizon) + 60vh),
+    #0c3956 calc(var(--horizon) + 75vh),
+    #0a314c calc(var(--horizon) + 90vh),
+    #082c45 calc(var(--horizon) + 105vh),
+    var(--sea-deep) calc(var(--horizon) + 120vh)
+  );
+  background-repeat: no-repeat;
+  background-size: 100% calc(var(--horizon) + 120vh);
   scrollbar-color: var(--sand) var(--sea);
 }
 
@@ -38,7 +57,6 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
-  background: var(--sea);
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }

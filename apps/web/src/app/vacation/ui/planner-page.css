@@ -6,7 +6,16 @@
 
 /* Sky */
 .bar {
-  background: var(--sky);
+  /* Lighter at the top, today's sky at the horizon; eased steps in OKLab. */
+  background: linear-gradient(
+    var(--sky-top),
+    #d1edf9 16.7%,
+    #c3e7f7 33.3%,
+    #b7e2f5 50%,
+    #afdff4 66.7%,
+    #aaddf3 83.3%,
+    var(--sky)
+  );
   color: var(--ink);
   padding: 16px 16px 72px;
 }
