@@ -1,4 +1,12 @@
-import { maskBrDate, parseBrDate, planLetter, tieNote, toBrDate } from './format';
+import {
+  formatDay,
+  formatRange,
+  maskBrDate,
+  parseBrDate,
+  planLetter,
+  tieNote,
+  toBrDate,
+} from './format';
 
 describe('Brazilian dates', () => {
   it('shows ISO dates as dd/mm/aaaa', () => {
@@ -31,5 +39,17 @@ describe('plan names', () => {
     expect(tieNote([5])).toBe('Empatado com o plano F');
     expect(tieNote([1, 2])).toBe('Empatado com os planos B e C');
     expect(tieNote([0, 2, 3, 4, 5, 6, 7, 9])).toBe('Empatado com os planos A, C a H e J');
+  });
+});
+
+describe('day and range labels', () => {
+  it('capitalizes the month', () => {
+    expect(formatDay('2027-02-08')).toBe('8 Fev');
+  });
+
+  it('joins a range with "até"', () => {
+    expect(formatRange('2027-02-01', '2027-02-05')).toBe('1 até 5 Fev');
+    expect(formatRange('2027-03-29', '2027-04-17')).toBe('29 Mar até 17 Abr');
+    expect(formatRange('2026-12-28', '2027-01-01')).toBe('28 Dez 2026 até 1 Jan 2027');
   });
 });

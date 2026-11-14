@@ -11,18 +11,22 @@ export function todayIso(): string {
 }
 
 const asDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
-const month = (iso: string) => MONTH.format(asDate(iso)).replace('.', '');
+/** "Fev": short month, capitalized. */
+const month = (iso: string) => {
+  const name = MONTH.format(asDate(iso)).replace('.', '');
+  return name[0].toUpperCase() + name.slice(1);
+};
 
-/** "1–5 fev", "29 mar–17 abr", "30 dez 2027–3 jan 2028". */
+/** "1 até 5 Fev", "29 Mar até 17 Abr", "30 Dez 2027 até 3 Jan 2028". */
 export function formatRange(start: string, end: string): string {
   const [sy, , sd] = start.split('-').map(Number);
   const [ey, , ed] = end.split('-').map(Number);
-  if (sy !== ey) return `${sd} ${month(start)} ${sy}–${ed} ${month(end)} ${ey}`;
-  if (start.slice(0, 7) === end.slice(0, 7)) return `${sd}–${ed} ${month(end)}`;
-  return `${sd} ${month(start)}–${ed} ${month(end)}`;
+  if (sy !== ey) return `${sd} ${month(start)} ${sy} até ${ed} ${month(end)} ${ey}`;
+  if (start.slice(0, 7) === end.slice(0, 7)) return `${sd} até ${ed} ${month(end)}`;
+  return `${sd} ${month(start)} até ${ed} ${month(end)}`;
 }
 
-/** "8 fev". */
+/** "8 Fev". */
 export function formatDay(iso: string): string {
   return `${Number(iso.slice(8))} ${month(iso)}`;
 }

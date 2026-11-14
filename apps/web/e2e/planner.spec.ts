@@ -266,7 +266,7 @@ test.describe('with the plans shown', () => {
       .locator('fieldset', { hasText: 'Licença ou banco de horas' })
       .getByRole('listitem');
     await expect(leave).toHaveCount(1);
-    await expect(leave).toContainText('9–12 fev');
+    await expect(leave).toContainText('9 até 12 Fev');
     await expect(firstPlan(page)).not.toHaveText(before);
     await expect(page.getByLabel('Primeiro dia')).toHaveValue('');
 
