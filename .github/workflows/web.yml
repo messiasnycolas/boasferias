@@ -6,6 +6,7 @@ on:
     paths: ['apps/web/**', 'firebase.json', '.github/workflows/web.yml']
   pull_request:
     paths: ['apps/web/**', 'firebase.json', '.github/workflows/web.yml']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -41,7 +42,7 @@ jobs:
   deploy:
     needs: gate
     # Skipped until the one-time GCP setup sets the repository variables.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.GCP_PROJECT_ID != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.GCP_PROJECT_ID != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
