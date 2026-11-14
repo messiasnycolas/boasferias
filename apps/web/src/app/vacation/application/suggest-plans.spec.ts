@@ -65,6 +65,8 @@ describe('suggestPlans', () => {
       [{ deadline: '2029-01-01' }, 'window-too-long'],
       [{ days: 31 }, 'invalid-days'],
       [{ days: 2.5 }, 'invalid-days'],
+      [{ days: 4 }, 'invalid-days'],
+      [{ days: 6, sellThird: true }, 'invalid-days'],
       [{ mode: 'pj', days: 31 }, 'invalid-days'],
       [{ maxPeriods: 4 }, 'invalid-periods'],
       [{ mode: 'pj', maxPeriods: 11 }, 'invalid-periods'],

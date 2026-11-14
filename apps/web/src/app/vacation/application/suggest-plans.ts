@@ -1,6 +1,12 @@
 import { DayNumber, parseIsoDate, toIsoDate, yearOf } from '../../calendar/domain/calendar-date';
 import { holidays } from '../../calendar/domain/holidays';
-import { CLT_MAX_DAYS, CLT_MAX_PERIODS, cltCandidates, enjoyedDays } from '../domain/clt';
+import {
+  CLT_MAX_DAYS,
+  CLT_MAX_PERIODS,
+  CLT_SHORT_PERIOD,
+  cltCandidates,
+  enjoyedDays,
+} from '../domain/clt';
 import { DaysOff } from '../domain/days-off';
 import { PJ_MAX_DAYS, PJ_MAX_PERIODS, pjCandidates } from '../domain/pj';
 import { Period, rankPlans } from '../domain/planner';
@@ -74,6 +80,8 @@ function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestE
   if (to < from) return 'deadline-before-start';
   if (to - from + 1 > MAX_WINDOW_DAYS) return 'window-too-long';
   if (!isIntIn(input.days, 1, clt ? CLT_MAX_DAYS : PJ_MAX_DAYS)) return 'invalid-days';
+  // No CLT period, single or split, may be shorter than 5 days.
+  if (clt && enjoyedDays(input.days, input.sellThird) < CLT_SHORT_PERIOD) return 'invalid-days';
   if (!isIntIn(input.maxPeriods, 1, clt ? CLT_MAX_PERIODS : PJ_MAX_PERIODS))
     return 'invalid-periods';
   const week = input.workWeek;

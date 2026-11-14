@@ -38,7 +38,7 @@ export function cltCandidates(
   days: number,
   maxPeriods: number,
 ): Period[] {
-  const minLength = maxPeriods === 1 ? days : Math.min(CLT_SHORT_PERIOD, days);
+  const minLength = maxPeriods === 1 ? days : CLT_SHORT_PERIOD;
   const candidates: Period[] = [];
   for (let start = from; start <= to; start++) {
     if (!canStartClt(start, daysOff)) continue;
