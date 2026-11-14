@@ -88,6 +88,19 @@ test.describe('before the first click', () => {
     await expect(page.locator('.results')).toBeFocused();
   });
 
+  test('open sections leave space before the next divider', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    await page.getByText('Feriados no período').click();
+    const gaps = await page.locator('details.more[open]').evaluateAll((sections) =>
+      sections.map((section) => {
+        const last = section.lastElementChild!.getBoundingClientRect();
+        return section.getBoundingClientRect().bottom - last.bottom;
+      }),
+    );
+    expect(gaps).toHaveLength(2);
+    for (const gap of gaps) expect(gap).toBeGreaterThanOrEqual(16);
+  });
+
   test('lists the holidays in their own closed section', async ({ page }) => {
     const section = page.locator('details', { hasText: 'Feriados no período' });
     await expect(section).not.toHaveAttribute('open');

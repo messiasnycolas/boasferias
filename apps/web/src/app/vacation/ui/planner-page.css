@@ -272,6 +272,11 @@ svg {
   border-top: 1px solid var(--line);
 }
 
+/* An open section ends with room before the next divider. */
+.more[open] {
+  padding-bottom: 20px;
+}
+
 .more summary::-webkit-details-marker {
   display: none;
 }
