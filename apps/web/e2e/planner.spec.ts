@@ -342,9 +342,10 @@ test.describe('with the plans shown', () => {
     expect(await page.evaluate(() => document.body.dataset['recomputed'])).toBeUndefined();
   });
 
-  for (const width of [320, 360, 384, 412]) {
+  for (const width of [320, 344, 360, 384, 412, 673]) {
     test.describe(`on a ${width} px phone`, () => {
-      test.use({ viewport: { width, height: 800 } });
+      // 344 x 882: Galaxy Z Fold cover screen (narrow and tall); 673: Fold unfolded.
+      test.use({ viewport: { width, height: width === 344 ? 882 : 800 } });
 
       test('every option fits the screen, is accessible and easy to tap', async ({ page }) => {
         await page.getByText('Mais filtros').click();
