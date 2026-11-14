@@ -83,10 +83,21 @@ h4 {
   color: var(--muted);
 }
 
+/* All in one row when it fits, else one per line; never a mix. --fit is the measured single-row width plus margin. */
+.legend {
+  --fit: 28em;
+}
+
+.legend.long {
+  --fit: 45em;
+}
+
 .legend li {
   display: flex;
+  flex-basis: calc((var(--fit) - 100%) * 999);
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .swatch {

@@ -14,7 +14,7 @@ const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   selector: 'app-plan-months',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ul class="legend">
+    <ul class="legend" [class.long]="hasCounted()">
       <li><i class="swatch vacation"></i>Férias</li>
       <li><i class="swatch off"></i>Folga</li>
       @if (hasCounted()) {

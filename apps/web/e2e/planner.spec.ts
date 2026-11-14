@@ -71,3 +71,26 @@ test('is accessible and fits a 360 px screen', async ({ page }) => {
     expect(box?.height, await button.innerText()).toBeGreaterThanOrEqual(44);
   }
 });
+
+test('lays the legend out all in one row or all in one column, never mixed', async ({ page }) => {
+  const layout = async () => {
+    const boxes = await page
+      .locator('.legend li')
+      .evaluateAll((items) => items.map((li) => li.getBoundingClientRect()));
+    if (boxes.every((b) => Math.abs(b.y - boxes[0].y) < 1)) return 'row';
+    if (boxes.every((b) => Math.abs(b.x - boxes[0].x) < 1)) return 'column';
+    return 'mixed';
+  };
+  await expect(page.locator('.legend li')).toHaveCount(4);
+  expect(await layout()).toBe('column');
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  expect(await layout()).toBe('row');
+
+  await page.getByRole('radio', { name: 'PJ' }).click();
+  await expect(page.locator('.legend li')).toHaveCount(3);
+  expect(await layout()).toBe('row');
+
+  await page.setViewportSize({ width: 360, height: 800 });
+  expect(await layout()).toBe('column');
+});
