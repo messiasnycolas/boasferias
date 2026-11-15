@@ -1,4 +1,4 @@
-import { SuggestError } from '../application/suggest-plans';
+import { Mode, SuggestError } from '../application/suggest-plans';
 
 const TIME_ZONE = 'America/Sao_Paulo';
 const MONTH = new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' });
@@ -21,6 +21,7 @@ const month = (iso: string) => {
 export function formatRange(start: string, end: string): string {
   const [sy, , sd] = start.split('-').map(Number);
   const [ey, , ed] = end.split('-').map(Number);
+  if (start === end) return formatDay(start);
   if (sy !== ey) return `${sd} ${month(start)} ${sy} até ${ed} ${month(end)} ${ey}`;
   if (start.slice(0, 7) === end.slice(0, 7)) return `${sd} até ${ed} ${month(end)}`;
   return `${sd} ${month(start)} até ${ed} ${month(end)}`;
@@ -59,6 +60,11 @@ export function parseBrDate(text: string): string | null {
   const date = new Date(Date.UTC(+y, +m - 1, +d));
   const real = date.getUTCDate() === +d && date.getUTCMonth() === +m - 1;
   return real ? `${y}-${m}-${d}` : null;
+}
+
+/** Share image's last line: "partindo de 30 dias de férias" (CLT) or "… 15 dias úteis" (PJ). */
+export function restFrom(mode: Mode, daysSpent: number): string {
+  return `${daysSpent} ${mode === 'clt' ? 'dias de férias' : 'dias úteis'}`;
 }
 
 /** "A", "B" … "T": plans are named by letter so the page shows fewer numbers. */

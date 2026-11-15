@@ -6,7 +6,7 @@
 | Período                          | period                         | One continuous stretch of vacation                                                                            |
 | Bloco de descanso                | block (`offStart`..`offEnd`)   | A period plus the non-work days touching it                                                                   |
 | Dias de descanso                 | days off (`daysOff`)           | Total days in blocks; the ranking score. The page never says "folga"                                          |
-| Dias extras                      | extra days                     | Days off minus days spent                                                                                     |
+| Dias a mais ("+14 dias")         | extra days (`extraDays`)       | Days off minus days spent. Shown as "+N dias"; the page never says "extra" or "folga"                       |
 | Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ: workdays                                                                |
 | Feriado                          | holiday                        | Default list in `calendar`; the user can remove or add days                                                   |
 | Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. City holidays wait for the city selector |
@@ -19,3 +19,4 @@
 | CLT / PJ                         | mode                           | Employee under the CLT / contractor                                                                           |
 | Plano A, B … T                   | plan (`limit`)                 | A ranked combination of periods, named by letter. 3 by default; "Calcular mais" adds 5 at a time, up to 20    |
 | Empatado                         | tie                            | Plans with the same days of rest; each tied plan names the others                                             |
+| Compartilhar                     | share image                    | A 1080x1350 JPEG of one plan: "VOU CURTIR N DIAS DE DESCANSO, partindo de X dias de férias" (PJ: "dias úteis") and the address. Phones get the share sheet with the image only; desktops download it |

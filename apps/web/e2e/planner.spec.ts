@@ -35,6 +35,17 @@ const rgbOf = (png: Buffer) => {
   return [row[1], row[2], row[3]];
 };
 
+/** Width and height of a JPEG, read from its start-of-frame marker. */
+const jpegSize = (jpeg: Buffer) => {
+  for (let at = 2; at < jpeg.length;) {
+    const marker = jpeg[at + 1];
+    if (marker >= 0xc0 && marker <= 0xc3)
+      return [jpeg.readUInt16BE(at + 7), jpeg.readUInt16BE(at + 5)];
+    at += 2 + jpeg.readUInt16BE(at + 2);
+  }
+  return null;
+};
+
 /** Any tone of our sea, from the light horizon to the deep bottom. */
 const isSea = ([r, g, b]: number[]) => r <= 25 && g >= 35 && g <= 95 && b >= 60 && b <= 140;
 
@@ -172,7 +183,8 @@ test.describe('with the plans shown', () => {
 
   test('ranks CLT plans with the defaults and shows the first on a calendar', async ({ page }) => {
     await expect(firstPlan(page)).toContainText('43 dias de descanso');
-    await expect(firstPlan(page)).toContainText('+13 extras');
+    await expect(firstPlan(page)).toContainText('+13 dias');
+    await expect(page.locator('main')).not.toContainText('extra');
     const days = page.locator('.plan.selected').locator('.day.vacation, .day.counted');
     await expect(days).toHaveCount(30);
   });
@@ -370,6 +382,20 @@ test.describe('with the plans shown', () => {
         }
       });
 
+      test('plans fit, with Compartilhar on the same row as the days count', async ({ page }) => {
+        await showPlans(page);
+        expect(await widest(page)).toBeLessThanOrEqual(width);
+        const days = await firstPlan(page).locator('.days-off').boundingBox();
+        const button = await firstPlan(page)
+          .getByRole('button', { name: 'Compartilhar' })
+          .boundingBox();
+        expect(button!.height).toBeGreaterThanOrEqual(44);
+        expect(button!.y).toBeLessThan(days!.y + days!.height);
+        expect(button!.y + button!.height).toBeGreaterThan(days!.y);
+        const { violations } = await new AxeBuilder({ page }).analyze();
+        expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+      });
+
       test('wrapped holiday names keep their row padding', async ({ page }) => {
         await page.getByText('Feriados no período').click();
         const gaps = await page.locator('.holidays li').evaluateAll((items) =>
@@ -384,4 +410,57 @@ test.describe('with the plans shown', () => {
       });
     });
   }
+});
+
+test.describe('sharing on desktop', () => {
+  test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
+  test.beforeEach(async ({ page }) => showPlans(page));
+
+  test('on desktop, Compartilhar downloads the plan as a 1080x1350 JPEG', async ({ page }) => {
+    const download = page.waitForEvent('download');
+    await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe('boas-ferias-plano-a.jpg');
+    const { readFileSync } = await import('node:fs');
+    expect(jpegSize(readFileSync(await file.path()))).toEqual([1080, 1350]);
+  });
+});
+
+test.describe('sharing on a phone', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 412, height: 915 } });
+
+  const stubShare = (page: Page, outcome: 'ok' | 'cancel') =>
+    page.addInitScript((outcome) => {
+      const shared: { files: { name: string; type: string }[]; text?: string; url?: string }[] = [];
+      Object.assign(window, { shared });
+      navigator.canShare = () => true;
+      navigator.share = async (data?: ShareData) => {
+        shared.push({
+          ...data,
+          files: (data?.files ?? []).map((f) => ({ name: f.name, type: f.type })),
+        });
+        if (outcome === 'cancel') throw new DOMException('Share canceled', 'AbortError');
+      };
+    }, outcome);
+
+  test('Compartilhar opens the share sheet with the image only', async ({ page }) => {
+    await stubShare(page, 'ok');
+    await page.reload();
+    await showPlans(page);
+    await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();
+    await expect.poll(() => page.evaluate(() => (window as any).shared.length)).toBe(1);
+    const [shared] = await page.evaluate(() => (window as any).shared);
+    expect(shared.files).toEqual([{ name: 'boas-ferias-plano-a.jpg', type: 'image/jpeg' }]);
+    expect(shared.text).toBeUndefined();
+    expect(shared.url).toBeUndefined();
+  });
+
+  test('closing the share sheet shows no error', async ({ page }) => {
+    await stubShare(page, 'cancel');
+    await page.reload();
+    await showPlans(page);
+    await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();
+    await expect.poll(() => page.evaluate(() => (window as any).shared.length)).toBe(1);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  });
 });

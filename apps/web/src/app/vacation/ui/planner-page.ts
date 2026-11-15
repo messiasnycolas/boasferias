@@ -23,6 +23,7 @@ import {
   formatDay,
   formatRange,
   planLetter,
+  restFrom,
   tieNote,
   todayIso,
 } from './format';
@@ -65,6 +66,9 @@ export class PlannerPage {
   protected readonly result = signal<SuggestResult | null>(null);
   private readonly resultInput = signal<SuggestInput | null>(null);
   protected readonly selected = signal(0);
+  /** Index of the plan whose share image is being made, and of the one that failed. */
+  protected readonly sharing = signal<number | null>(null);
+  protected readonly shareFailed = signal<number | null>(null);
   protected readonly customWeek = signal(false);
   /** "Licença ou banco de horas": first day required, last day optional (a range). */
   protected readonly leaveStart = signal('');
@@ -235,6 +239,29 @@ export class PlannerPage {
     );
   }
 
+  /** Phones get the share sheet with the image only; elsewhere the image downloads. */
+  protected async share(index: number): Promise<void> {
+    const plan = this.plans()[index];
+    const input = this.resultInput();
+    if (!plan || !input || this.sharing() !== null) return;
+    this.sharing.set(index);
+    this.shareFailed.set(null);
+    try {
+      const { drawShareImage } = await import('./share-image');
+      const blob = await drawShareImage(plan.daysOff, restFrom(input.mode, plan.daysSpent));
+      const name = `boas-ferias-plano-${planLetter(index).toLowerCase()}.jpg`;
+      const file = new File([blob], name, { type: 'image/jpeg' });
+      const phone = window.matchMedia('(pointer: coarse)').matches;
+      if (phone && navigator.canShare?.({ files: [file] }))
+        await navigator.share({ files: [file] });
+      else download(file);
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') this.shareFailed.set(index);
+    } finally {
+      this.sharing.set(null);
+    }
+  }
+
   protected onScroll(): void {
     this.scrolledDown.set(window.scrollY > window.innerHeight);
   }
@@ -270,6 +297,14 @@ export class PlannerPage {
 /** True when two inputs differ at most in how many plans they ask for. */
 function sameExceptLimit(a: SuggestInput, b: SuggestInput | null): boolean {
   return !!b && JSON.stringify({ ...a, limit: 0 }) === JSON.stringify({ ...b, limit: 0 });
+}
+
+function download(file: File): void {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  link.download = file.name;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
 function smoothUnlessReduced(): ScrollBehavior {

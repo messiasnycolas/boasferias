@@ -4,6 +4,7 @@ import {
   maskBrDate,
   parseBrDate,
   planLetter,
+  restFrom,
   tieNote,
   toBrDate,
 } from './format';
@@ -51,5 +52,14 @@ describe('day and range labels', () => {
     expect(formatRange('2027-02-01', '2027-02-05')).toBe('1 até 5 Fev');
     expect(formatRange('2027-03-29', '2027-04-17')).toBe('29 Mar até 17 Abr');
     expect(formatRange('2026-12-28', '2027-01-01')).toBe('28 Dez 2026 até 1 Jan 2027');
+    expect(formatRange('2026-11-23', '2026-11-23')).toBe('23 Nov');
+  });
+});
+
+describe('share image', () => {
+  it('says what the rest started from, in the unit of the mode', () => {
+    expect(restFrom('clt', 30)).toBe('30 dias de férias');
+    expect(restFrom('clt', 20)).toBe('20 dias de férias');
+    expect(restFrom('pj', 15)).toBe('15 dias úteis');
   });
 });

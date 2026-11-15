@@ -553,8 +553,21 @@ h3 {
   white-space: nowrap;
 }
 
+.days-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.share-error {
+  margin: 6px 0 0;
+  color: var(--holiday);
+}
+
 .days-off {
-  margin: 10px 0 0;
+  margin: 0;
   font-size: 17px;
   font-weight: 600;
 }

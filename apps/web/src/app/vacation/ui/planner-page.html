@@ -340,12 +340,27 @@
           <li class="card plan" [class.selected]="selected() === $index">
             <div class="card-head">
               <h3>Plano {{ planLetter($index) }}</h3>
-              <span class="extra">+{{ plan.extraDays }} extras</span>
+              <span class="extra">+{{ plan.extraDays }} dias</span>
             </div>
             <div class="card-body">
-              <p class="days-off">
-                <span class="number">{{ plan.daysOff }}</span> dias de descanso
-              </p>
+              <div class="days-row">
+                <p class="days-off">
+                  <span class="number">{{ plan.daysOff }}</span> dias de descanso
+                </p>
+                <button
+                  type="button"
+                  class="secondary"
+                  [attr.aria-disabled]="sharing() !== null"
+                  (click)="share($index)"
+                >
+                  Compartilhar
+                </button>
+              </div>
+              @if (shareFailed() === $index) {
+                <p class="share-error" role="alert">
+                  Não foi possível gerar a imagem. Tente de novo.
+                </p>
+              }
               @if (tiedWith($index); as tie) {
                 <p class="tie">{{ tie }}</p>
               }
