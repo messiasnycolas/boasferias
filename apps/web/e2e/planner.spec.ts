@@ -50,13 +50,13 @@ const jpegSize = (jpeg: Buffer) => {
 const isSea = ([r, g, b]: number[]) => r <= 25 && g >= 35 && g <= 95 && b >= 60 && b <= 140;
 
 test.describe('before the first click', () => {
-  test('raised buttons are filled with coconut shell, so the trunk never shows through', async ({
+  test('raised buttons are filled a step lighter than the trunk, so they float off it', async ({
     page,
   }) => {
     const fill = await page
       .getByRole('button', { name: 'Ver melhores datas' })
       .evaluate((button) => getComputedStyle(button).backgroundColor);
-    expect(fill).toBe('rgb(58, 36, 22)');
+    expect(fill).toBe('rgb(101, 70, 47)');
   });
 
   test('taps show no blue browser highlight', async ({ page }) => {
