@@ -218,6 +218,39 @@ test.describe('before the first click', () => {
     ).toBe(1);
   });
 
+  test('the page never scrolls while the first reveal morphs', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    // Scroll position when the morph starts and when it ends.
+    await page.addInitScript(() => {
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = ((update: () => Promise<void>) => {
+        const transition = start(update);
+        const log = ((window as unknown as { scrolls: number[] }).scrolls = []);
+        transition.ready.then(() => log.push(scrollY));
+        transition.finished.then(() => log.push(scrollY));
+        return transition;
+      }) as typeof document.startViewTransition;
+    });
+    await page.reload();
+    await page.getByText('Mais filtros').click();
+    await page.getByRole('button', { name: 'Ver melhores datas' }).click();
+    await expect(page.locator('.results')).toBeFocused();
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { scrolls: number[] }).scrolls))
+      .toHaveLength(2);
+    const [atStart, atEnd] = await page.evaluate(
+      () => (window as unknown as { scrolls: number[] }).scrolls,
+    );
+    expect(atEnd).toBe(atStart);
+    // The form keeps showing its end, where the button was clicked, so it slides unchanged.
+    await expect(page.getByRole('button', { name: 'Ver melhores datas' })).toBeInViewport();
+    expect(
+      await page
+        .locator('.form > .card-body')
+        .evaluate((el) => el.scrollTop + el.clientHeight >= el.scrollHeight - 1),
+    ).toBe(true);
+  });
+
   test('with reduced motion the plans appear at once', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await countTransitions(page);

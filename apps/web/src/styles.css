@@ -137,8 +137,19 @@ app-planner-page .results {
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* The form keeps what it showed (see showResults), so both pictures of it line up at the button
+   and it simply slides; it passes over the plans, which rise in a beat later. */
+::view-transition-old(form),
+::view-transition-new(form) {
+  inset-block: auto 0;
+}
+
+::view-transition-group(form) {
+  z-index: 1;
+}
+
 ::view-transition-new(results) {
-  animation: rise-in 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: rise-in 450ms 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes rise-in {

@@ -229,12 +229,22 @@ export class PlannerPage {
       return;
     }
     // The first reveal animates: the browser snapshots the page, Angular renders, then it morphs.
+    // Everything settles before the second snapshot: on desktop the form now scrolls inside itself,
+    // and it keeps showing its end, where the button was clicked, so it slides without changing.
     const reveal = () =>
       new Promise<void>((rendered) => {
         this.revealed.set(true);
-        afterNextRender(() => rendered(), { injector: this.injector });
+        afterNextRender(
+          () => {
+            const body = this.host.nativeElement.querySelector('.form > .card-body');
+            if (body) body.scrollTop = body.scrollHeight;
+            focus();
+            rendered();
+          },
+          { injector: this.injector },
+        );
       });
-    document.startViewTransition(reveal).updateCallbackDone.then(focus);
+    document.startViewTransition(reveal);
   }
 
   /** Opens a plan on the calendar and brings that calendar to the top of the screen. */
