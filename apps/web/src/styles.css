@@ -147,3 +147,52 @@ app-planner-page .results {
     transform: translateY(32px);
   }
 }
+
+/* Floating buttons: on hover a band of light crosses them from bottom-left to top-right, the
+   colour stays. On the light button the core is full white with faintly shaded edges, so it
+   still reads on near-white. Here, not in the page's styles, which are at their size budget. */
+app-planner-page .raised {
+  --glow: 30%;
+  --edge: 0%;
+  position: relative;
+  overflow: hidden;
+}
+
+app-planner-page .raised.light {
+  --glow: 100%;
+  --edge: 7%;
+}
+
+app-planner-page .raised::after {
+  content: '';
+  position: absolute;
+  inset: -60%;
+  pointer-events: none;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgb(0 0 0 / var(--edge)) 36%,
+    rgb(255 255 255 / var(--glow)) 50%,
+    rgb(0 0 0 / var(--edge)) 64%,
+    transparent 70%
+  );
+  transform: translate(-55%, 55%);
+}
+
+@media (hover: hover) {
+  app-planner-page .raised:not([aria-disabled='true']):hover::after {
+    transform: translate(55%, -55%);
+    transition: transform 900ms ease-in-out;
+  }
+}
+
+app-planner-page .raised:focus-visible::after {
+  transform: translate(55%, -55%);
+  transition: transform 900ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  app-planner-page .raised::after {
+    display: none;
+  }
+}

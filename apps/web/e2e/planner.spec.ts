@@ -540,6 +540,24 @@ test.describe('sharing on desktop', () => {
     expect(style.shadow).toContain('-4px 3px 0px');
   });
 
+  test('hover sweeps a band of light across a floating button', async ({ page }) => {
+    const button = page.getByRole('button', { name: 'Ver no calendário' }).first();
+    const band = () => button.evaluate((el) => getComputedStyle(el, '::after').transform);
+    const parked = await band();
+    await button.hover();
+    await expect.poll(band).not.toBe(parked);
+    const light = firstPlan(page).getByRole('button', { name: 'Compartilhar' });
+    expect(await light.evaluate((el) => getComputedStyle(el, '::after').backgroundImage)).toContain(
+      'rgb(255, 255, 255)',
+    );
+  });
+
+  test('reduced motion shows no band of light', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const button = page.getByRole('button', { name: 'Ver no calendário' }).first();
+    expect(await button.evaluate((el) => getComputedStyle(el, '::after').display)).toBe('none');
+  });
+
   test('on desktop, Compartilhar downloads the plan as a 1080x1350 JPEG', async ({ page }) => {
     const download = page.waitForEvent('download');
     await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();
