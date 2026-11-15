@@ -396,6 +396,21 @@ test.describe('with the plans shown', () => {
         expect(violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
       });
 
+      test('date fields are as wide as a date and its calendar button, not the column', async ({
+        page,
+      }) => {
+        await page.getByText('Mais filtros').click();
+        const fields = page.locator('app-date-field');
+        for (const field of await fields.all()) {
+          const box = (await field.boundingBox())!;
+          expect(box.width).toBeLessThanOrEqual(170);
+          const input = field.locator('input[type="text"]');
+          await input.fill('28022027');
+          expect(await input.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+        }
+        expect(await widest(page)).toBeLessThanOrEqual(width);
+      });
+
       test('wrapped holiday names keep their row padding', async ({ page }) => {
         await page.getByText('Feriados no período').click();
         const gaps = await page.locator('.holidays li').evaluateAll((items) =>
