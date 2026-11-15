@@ -643,9 +643,24 @@ h3 {
     align-items: start;
   }
 
+  /* Never taller than the screen: the title and the button stay, the fields scroll between them. */
   .layout.revealed .form {
     position: sticky;
     top: 16px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 32px);
+  }
+
+  .layout.revealed .form > * {
+    flex-shrink: 0;
+  }
+
+  .layout.revealed .form > .card-body {
+    flex-shrink: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .results {

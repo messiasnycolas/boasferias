@@ -412,6 +412,36 @@ test.describe('with the plans shown', () => {
   }
 });
 
+test.describe('desktop form beside the plans', () => {
+  test.use({ hasTouch: false, isMobile: false, viewport: { width: 1920, height: 1080 } });
+
+  test('never grows past the screen: only its middle scrolls, title and button stay', async ({
+    page,
+  }) => {
+    await showPlans(page);
+    await page.getByText('Mais filtros').click();
+    await page.getByText('Feriados no período').click();
+    await page.getByRole('radio', { name: 'Outra' }).click();
+    const form = page.locator('form.form');
+    const body = form.locator('.card-body');
+    await page.evaluate(() => window.scrollTo(0, 600));
+    const box = (await form.boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(1080);
+    await expect(page.getByRole('heading', { name: 'Suas férias' })).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Ver melhores datas' })).toBeInViewport();
+
+    await body.hover();
+    await page.mouse.wheel(0, 5000);
+    await expect
+      .poll(() => body.evaluate((el) => el.scrollTop + el.clientHeight >= el.scrollHeight - 1))
+      .toBe(true);
+    await expect(page.locator('.holidays li').last()).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Ver melhores datas' })).toBeInViewport();
+    expect(await page.evaluate(() => window.scrollY)).toBe(600);
+  });
+});
+
 test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));
