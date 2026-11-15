@@ -6,7 +6,8 @@
   --column: 472px;
 }
 
-/* Wider only where form and plans sit side by side; below that, plans stack under the same column. */
+/* Wider only where form and plans sit side by side (before the click it is 412 px there, set in
+   styles.css, so the form stays 380 px); below that, plans stack under the same column. */
 @media (min-width: 960px) {
   :host(.revealed) {
     --column: 1080px;

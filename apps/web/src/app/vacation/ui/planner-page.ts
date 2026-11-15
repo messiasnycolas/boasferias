@@ -222,8 +222,19 @@ export class PlannerPage {
       clearTimeout(this.timer);
       this.compute(this.form());
     }
-    this.revealed.set(true);
-    afterNextRender(() => this.results()?.nativeElement.focus(), { injector: this.injector });
+    const focus = () => this.results()?.nativeElement.focus();
+    if (this.revealed() || !document.startViewTransition || reducedMotion()) {
+      this.revealed.set(true);
+      afterNextRender(focus, { injector: this.injector });
+      return;
+    }
+    // The first reveal animates: the browser snapshots the page, Angular renders, then it morphs.
+    const reveal = () =>
+      new Promise<void>((rendered) => {
+        this.revealed.set(true);
+        afterNextRender(() => rendered(), { injector: this.injector });
+      });
+    document.startViewTransition(reveal).updateCallbackDone.then(focus);
   }
 
   /** Opens a plan on the calendar and brings that calendar to the top of the screen. */
@@ -307,6 +318,10 @@ function download(file: File): void {
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
+function reducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 function smoothUnlessReduced(): ScrollBehavior {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  return reducedMotion() ? 'auto' : 'smooth';
 }

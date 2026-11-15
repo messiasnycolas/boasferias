@@ -170,6 +170,63 @@ test.describe('before the first click', () => {
     const results = (await page.locator('.results').boundingBox())!;
     expect(results.x).toBeGreaterThan(after.x + after.width);
   });
+
+  for (const [width, height] of [
+    [1024, 768],
+    [1440, 900],
+    [1920, 1080],
+  ]) {
+    test(`on a ${width} px desktop the form keeps its width and the header stays aligned with it`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      const edges = () =>
+        page.evaluate(() => {
+          const form = document.querySelector('form')!.getBoundingClientRect();
+          const title = document.querySelector('h1')!.getBoundingClientRect();
+          return { width: form.width, formX: form.x, titleX: title.x };
+        });
+      const before = await edges();
+      await showPlans(page);
+      const after = await edges();
+      expect(after.width).toBe(before.width);
+      expect(Math.abs(before.titleX - before.formX)).toBeLessThan(1);
+      expect(Math.abs(after.titleX - after.formX)).toBeLessThan(1);
+    });
+  }
+
+  const countTransitions = (page: Page) =>
+    page.addInitScript(() => {
+      const start = document.startViewTransition?.bind(document);
+      Object.assign(window, { transitions: 0 });
+      if (start)
+        document.startViewTransition = ((update: () => void) => {
+          (window as unknown as { transitions: number }).transitions++;
+          return start(update);
+        }) as typeof document.startViewTransition;
+    });
+
+  test('the first click animates the plans in, once', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await countTransitions(page);
+    await page.reload();
+    await showPlans(page);
+    await expect(page.locator('.results')).toBeFocused();
+    await page.getByRole('button', { name: 'Ver melhores datas' }).click();
+    expect(
+      await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
+    ).toBe(1);
+  });
+
+  test('with reduced motion the plans appear at once', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await countTransitions(page);
+    await page.reload();
+    await showPlans(page);
+    expect(
+      await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
+    ).toBe(0);
+  });
 });
 
 test.describe('with the plans shown', () => {
