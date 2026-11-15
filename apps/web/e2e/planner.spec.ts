@@ -461,6 +461,28 @@ test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));
 
+  test('floating buttons keep their colour on hover; Compartilhar floats on the sand', async ({
+    page,
+  }) => {
+    const fillOf = (name: string) =>
+      page
+        .getByRole('button', { name })
+        .first()
+        .evaluate((el) => getComputedStyle(el).backgroundColor);
+    const before = await fillOf('Ver no calendário');
+    await page.getByRole('button', { name: 'Ver no calendário' }).first().hover();
+    expect(await fillOf('Ver no calendário')).toBe(before);
+
+    const share = firstPlan(page).getByRole('button', { name: 'Compartilhar' });
+    const style = await share.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { fill: s.backgroundColor, image: s.backgroundImage, shadow: s.boxShadow };
+    });
+    expect(style.fill).toBe('rgb(249, 238, 216)');
+    expect(style.image).toBe('none');
+    expect(style.shadow).toContain('-4px 3px 0px');
+  });
+
   test('on desktop, Compartilhar downloads the plan as a 1080x1350 JPEG', async ({ page }) => {
     const download = page.waitForEvent('download');
     await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();

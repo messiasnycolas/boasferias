@@ -448,7 +448,7 @@ svg {
   padding: 10px 14px;
   border: 2px solid var(--sand);
   border-radius: 10px;
-  /* Coconut shell inside: the button reads as its own piece on the trunk. */
+  /* A step lighter than the trunk: the button reads as its own piece on it. */
   background: var(--husk);
   color: var(--sand);
   font-size: 16px;
@@ -460,8 +460,13 @@ svg {
     box-shadow 80ms ease-out;
 }
 
-.raised:hover {
-  background: color-mix(in oklab, var(--husk), var(--sand) 10%);
+/* On the sand: the same floating piece in ink, a step lighter than the card. */
+.raised.light {
+  width: auto;
+  border-color: var(--ink);
+  background: var(--sand-light);
+  color: var(--ink);
+  box-shadow: -4px 3px 0 var(--ink);
 }
 
 .raised[aria-disabled='true'] {
