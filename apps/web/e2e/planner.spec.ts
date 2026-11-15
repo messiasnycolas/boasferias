@@ -551,6 +551,20 @@ test('both switches slide one indicator under the chosen option', async ({ page 
   }
 });
 
+test('search engines see one address: boasferias.app.br', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://boasferias.app.br/',
+  );
+  expect(await (await request.get('/robots.txt')).text()).toContain(
+    'Sitemap: https://boasferias.app.br/sitemap.xml',
+  );
+  expect(await (await request.get('/sitemap.xml')).text()).toContain(
+    '<loc>https://boasferias.app.br/</loc>',
+  );
+});
+
 test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));

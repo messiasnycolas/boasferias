@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://boas-ferias.web.app/sitemap.xml
+Sitemap: https://boasferias.app.br/sitemap.xml
