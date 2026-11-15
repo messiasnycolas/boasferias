@@ -48,7 +48,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
   selector: 'app-planner-page',
   imports: [BackToTop, DateField, PlanMonths],
   templateUrl: './planner-page.html',
-  styleUrl: './planner-page.css',
+  styleUrls: ['./planner-page.css', './switches.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(window:scroll)': 'onScroll()', '[class.revealed]': 'revealed()' },
 })

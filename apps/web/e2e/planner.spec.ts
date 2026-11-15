@@ -428,6 +428,13 @@ test.describe('with the plans shown', () => {
         await page.getByText('Mais filtros').click();
         await page.getByText('Feriados no período').click();
         await page.getByRole('radio', { name: 'Outra' }).click();
+        // Equal options still fit a 360 px phone, each on one line.
+        for (const radio of await page
+          .getByRole('radiogroup', { name: 'Semana de trabalho' })
+          .getByRole('radio')
+          .all()) {
+          expect((await radio.boundingBox())!.height).toBe(44);
+        }
         await expect(page.locator('.chip')).toHaveCount(7);
 
         expect(await widest(page)).toBeLessThanOrEqual(width);
@@ -512,6 +519,36 @@ test.describe('desktop form beside the plans', () => {
     await expect(page.getByRole('button', { name: 'Ver melhores datas' })).toBeInViewport();
     expect(await page.evaluate(() => window.scrollY)).toBe(600);
   });
+});
+
+test('both switches slide one indicator under the chosen option', async ({ page }) => {
+  await page.goto('/');
+  // Where the indicator ends, relative to its group, and how long it takes to get there.
+  const indicator = (group: string) =>
+    page.getByRole('radiogroup', { name: group }).evaluate((el) => {
+      const s = getComputedStyle(el, '::before');
+      return { x: new DOMMatrix(s.transform).m41, duration: s.transitionDuration };
+    });
+  const offset = (name: string) =>
+    page.getByRole('radio', { name }).evaluate((el) => (el as HTMLElement).offsetLeft - 3);
+
+  await page.getByRole('radio', { name: 'PJ' }).click();
+  expect((await indicator('Regime de trabalho')).duration).toBe('0.25s');
+  await expect
+    .poll(async () => Math.abs((await indicator('Regime de trabalho')).x - (await offset('PJ'))))
+    .toBeLessThan(1);
+
+  await page.getByText('Mais filtros').click();
+  await page.getByRole('radio', { name: 'Outra' }).click();
+  await expect
+    .poll(async () => Math.abs((await indicator('Semana de trabalho')).x - (await offset('Outra'))))
+    .toBeLessThan(1);
+
+  // Equal options still fit a 360 px phone, each on one line.
+  const week = page.getByRole('radiogroup', { name: 'Semana de trabalho' });
+  for (const radio of await week.getByRole('radio').all()) {
+    expect((await radio.boundingBox())!.height).toBe(44);
+  }
 });
 
 test.describe('sharing on desktop', () => {

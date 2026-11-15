@@ -69,31 +69,6 @@ svg.logo {
   text-wrap: balance;
 }
 
-/* CLT/PJ: a white cloud with a black outline. */
-.cloud {
-  display: flex;
-  padding: 3px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: #fff;
-}
-
-.cloud button {
-  min-width: 56px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background: none;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cloud button[aria-checked='true'] {
-  border-color: var(--ink);
-  font-weight: 800;
-}
-
 /* Sea */
 .layout {
   max-width: var(--column);
@@ -306,31 +281,6 @@ svg {
   margin: 8px 0 0;
   font-size: 13px;
   color: var(--muted);
-}
-
-.segmented {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  padding: 3px;
-  border: 1.5px solid var(--edge);
-  border-radius: 999px;
-  background: var(--coconut);
-}
-
-.segmented button {
-  min-height: 44px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.segmented button[aria-checked='true'] {
-  background: var(--ink);
-  color: var(--coconut);
 }
 
 /* Seven days share the width: 44 px tall, as wide as the card allows. */
