@@ -130,6 +130,8 @@ app-planner-page .form {
 
 app-planner-page .results {
   view-transition-name: results;
+  /* After the reveal the page glides here; the plans line up with the sticky form's top. */
+  scroll-margin-top: 16px;
 }
 
 ::view-transition-group(*) {

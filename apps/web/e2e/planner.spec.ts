@@ -218,7 +218,9 @@ test.describe('before the first click', () => {
     ).toBe(1);
   });
 
-  test('the page never scrolls while the first reveal morphs', async ({ page }) => {
+  test('the first reveal morphs with the page still, then scrolls to the plans', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
     // Scroll position when the morph starts and when it ends.
     await page.addInitScript(() => {
@@ -242,6 +244,12 @@ test.describe('before the first click', () => {
       () => (window as unknown as { scrolls: number[] }).scrolls,
     );
     expect(atEnd).toBe(atStart);
+    // Then the page glides to the plans, which line up with the top of the sticky form.
+    await expect
+      .poll(() =>
+        page.locator('.results').evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+      )
+      .toBe(16);
     // The form keeps showing its end, where the button was clicked, so it slides unchanged.
     await expect(page.getByRole('button', { name: 'Ver melhores datas' })).toBeInViewport();
     expect(
