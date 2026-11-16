@@ -39,4 +39,17 @@ describe('holidays', () => {
     expect(iso(2023).some((h) => h.includes('Consciência Negra'))).toBe(false);
     expect(iso(2024).some((h) => h.includes('Consciência Negra'))).toBe(true);
   });
+
+  it("adds the chosen state's holidays to the defaults", () => {
+    const sp = holidays(2027, 'SP').map((h) => `${toIsoDate(h.date)} ${h.name}`);
+    expect(sp).toContain('2027-07-09 Revolução Constitucionalista');
+    expect(sp).toContain('2027-05-27 Corpus Christi');
+    expect(sp.length).toBe(iso(2027).length + 1);
+  });
+
+  it('lists a day once when a state holiday falls on a national one', () => {
+    // 2025: Easter on 20 Apr puts Nossa Senhora da Penha (ES) on Monday 21 Apr, Tiradentes.
+    const es = holidays(2025, 'ES').filter((h) => toIsoDate(h.date) === '2025-04-21');
+    expect(es.map((h) => h.name)).toEqual(['Tiradentes']);
+  });
 });

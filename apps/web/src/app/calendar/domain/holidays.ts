@@ -1,55 +1,22 @@
-import { DayNumber, addDays, dayOf } from './calendar-date';
+import { HolidayRule, Holiday, holidaysOf } from './holiday-rules';
+import { NATIONAL } from './national-holidays';
+import { Uf, stateHolidays } from './state-holidays';
 
-export interface Holiday {
-  date: DayNumber;
-  name: string;
-}
+export { easter } from './holiday-rules';
+export type { Holiday } from './holiday-rules';
 
-const FIXED: readonly [month: number, day: number, name: string, since?: number][] = [
-  [1, 1, 'Confraternização Universal'],
-  [4, 21, 'Tiradentes'],
-  [5, 1, 'Dia do Trabalho'],
-  [9, 7, 'Independência do Brasil'],
-  [10, 12, 'Nossa Senhora Aparecida'],
-  [11, 2, 'Finados'],
-  [11, 15, 'Proclamação da República'],
-  [11, 20, 'Consciência Negra', 2024],
-  [12, 25, 'Natal'],
-];
-const GOOD_FRIDAY_OFFSET = -2;
-const CORPUS_CHRISTI_OFFSET = 60;
-
-/** Easter Sunday, anonymous Gregorian algorithm. */
-export function easter(year: number): DayNumber {
-  const a = year % 19;
-  const b = Math.floor(year / 100);
-  const c = year % 100;
-  const d = Math.floor(b / 4);
-  const e = b % 4;
-  const f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3);
-  const h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4);
-  const k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31);
-  const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return dayOf(year, month, day);
-}
+/** City holidays in practice across the target capitals (see docs/business/clt-vacation.md). */
+const GOOD_FRIDAY: HolidayRule = { easter: -2, name: 'Sexta-feira Santa' };
+const CORPUS_CHRISTI: HolidayRule = { easter: 60, name: 'Corpus Christi' };
 
 /**
- * Default holidays: national ones plus Good Friday and Corpus Christi, which are city holidays
- * in practice across the target capitals (see docs/business/clt-vacation.md).
+ * Holidays for a year: national ones plus Good Friday and Corpus Christi, which are city holidays
+ * in practice across the target capitals, plus the state's when one is chosen. A state day that is
+ * already a national holiday is listed once.
  */
-export function holidays(year: number): Holiday[] {
-  const easterSunday = easter(year);
-  const list: Holiday[] = FIXED.filter(([, , , since]) => !since || year >= since).map(
-    ([month, day, name]) => ({ date: dayOf(year, month, day), name }),
-  );
-  list.push(
-    { date: addDays(easterSunday, GOOD_FRIDAY_OFFSET), name: 'Sexta-feira Santa' },
-    { date: addDays(easterSunday, CORPUS_CHRISTI_OFFSET), name: 'Corpus Christi' },
-  );
+export function holidays(year: number, state?: Uf): Holiday[] {
+  const list = holidaysOf([...NATIONAL, GOOD_FRIDAY, CORPUS_CHRISTI], year);
+  const taken = new Set(list.map((h) => h.date));
+  if (state) list.push(...stateHolidays(state, year).filter((h) => !taken.has(h.date)));
   return list.sort((x, y) => x.date - y.date);
 }

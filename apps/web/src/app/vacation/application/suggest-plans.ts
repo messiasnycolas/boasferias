@@ -1,5 +1,6 @@
 import { DayNumber, parseIsoDate, toIsoDate, yearOf } from '../../calendar/domain/calendar-date';
 import { Holiday, holidays } from '../../calendar/domain/holidays';
+import { STATES, Uf } from '../../calendar/domain/state-holidays';
 import {
   CLT_MAX_DAYS,
   CLT_MAX_PERIODS,
@@ -35,6 +36,8 @@ export interface SuggestInput {
   deadline: string;
   /** Worked weekdays, 0 = Sunday. */
   workWeek: readonly number[];
+  /** Where the worker is: adds the state's holidays. */
+  state: Uf | null;
   removedHolidays: readonly string[];
   extraDaysOff: readonly string[];
   limit: number;
@@ -47,7 +50,8 @@ export type SuggestError =
   | 'invalid-days'
   | 'invalid-periods'
   | 'invalid-work-week'
-  | 'invalid-limit';
+  | 'invalid-limit'
+  | 'invalid-state';
 
 export interface PeriodView {
   start: string;
@@ -94,6 +98,7 @@ function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestE
   if (week.length === 0 || !week.every((day) => isIntIn(day, 0, WEEKDAYS - 1)))
     return 'invalid-work-week';
   if (!isIntIn(input.limit, 1, MAX_LIMIT)) return 'invalid-limit';
+  if (input.state !== null && !STATES.includes(input.state)) return 'invalid-state';
   return null;
 }
 
@@ -110,7 +115,7 @@ function toPeriodView(c: Period): PeriodView {
 
 /** Default holidays around [from, to] and the resulting work calendar, after the user's changes. */
 export function holidayContext(
-  input: Pick<SuggestInput, 'workWeek'>,
+  input: Pick<SuggestInput, 'workWeek' | 'state'>,
   from: DayNumber,
   to: DayNumber,
   removed: readonly DayNumber[],
@@ -119,7 +124,7 @@ export function holidayContext(
   // One year of margin: blocks of days off may reach past the window.
   const defaults: Holiday[] = [];
   for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
-    defaults.push(...holidays(year));
+    defaults.push(...holidays(year, input.state ?? undefined));
   const removedSet = new Set(removed);
   const daysOff = new DaysOff(input.workWeek, [
     ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),

@@ -22,11 +22,12 @@ Days are calendar days: weekends and holidays inside a period count as vacation.
 - Good Friday: religious holiday set by city law (Lei 9.093/1995, art. 2); a holiday in all target capitals.
 - Corpus Christi: city or state holiday in SP, RJ, BH, Porto Alegre, Curitiba and Florianópolis; not in Recife.
 - Carnaval: optional day off (ponto facultativo) everywhere except Tuesday in RJ (state law).
+- State holidays: per state, with sources, in [holidays.md](holidays.md).
 
 ## Product decisions
 
 - Target users: Rio, São Paulo, Belo Horizonte, Recife, Porto Alegre, Curitiba, Florianópolis.
-- Default holidays: national + Good Friday + Corpus Christi. Users can remove any and add days they already have free ("Licença ou banco de horas"). City holidays wait for the city selector.
+- Default holidays: national + Good Friday + Corpus Christi, plus the state's once one is chosen ("Estado", remembered on the device). Users can remove any and add days they already have free ("Licença ou banco de horas"). City holidays wait for the city selector.
 - Added days off also block CLT starts in the 2 days before them (legally safe).
 - Work week: Mon-Fri, Mon-Sat or custom. Weekly rest is Sunday; if Sunday is worked, every non-work day counts as rest for the start rule.
 - CLT spends calendar days; PJ spends workdays only (holidays and weekends inside a PJ period are free).

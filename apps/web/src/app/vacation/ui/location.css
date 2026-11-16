@@ -1,0 +1,24 @@
+/* Where the worker is (Estado), which adds local holidays. Kept apart from the page's styles,
+   which are at their size budget. */
+.place {
+  min-width: 0;
+  flex: 0 1 auto;
+  min-height: 44px;
+  padding: 0 36px 0 12px;
+  border: 1.5px solid var(--edge);
+  border-radius: 10px;
+  background: var(--coconut)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2314181d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 10l5 5 5-5'/%3E%3C/svg%3E")
+    no-repeat right 10px center / 18px;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  appearance: none;
+  cursor: pointer;
+}
+
+.place:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}

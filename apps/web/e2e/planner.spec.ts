@@ -639,6 +639,22 @@ test('search engines see one address: boasferias.app.br', async ({ page, request
   );
 });
 
+test('the chosen state adds its holidays and is remembered on this device', async ({ page }) => {
+  await page.goto('/');
+  const state = page.getByLabel('Estado');
+  await expect(state).toHaveValue('');
+  await showPlans(page);
+  const holidays = page.locator('.holidays');
+  await page.getByText('Feriados no período').click();
+  await expect(holidays).not.toContainText('Revolução Constitucionalista');
+
+  await state.selectOption({ label: 'São Paulo' });
+  await expect(holidays).toContainText('Revolução Constitucionalista');
+
+  await page.reload();
+  await expect(page.getByLabel('Estado')).toHaveValue('SP');
+});
+
 test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));

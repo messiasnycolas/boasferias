@@ -96,4 +96,5 @@ export const ERROR_MESSAGES: Record<SuggestError, string> = {
   'invalid-periods': 'Na CLT, divida em até 3 períodos. No PJ, em até 10.',
   'invalid-work-week': 'Marque pelo menos um dia de trabalho na semana.',
   'invalid-limit': 'Não foi possível calcular. Recarregue a página.',
+  'invalid-state': 'Não foi possível calcular. Recarregue a página.',
 };

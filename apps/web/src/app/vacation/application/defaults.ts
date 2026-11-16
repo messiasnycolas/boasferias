@@ -33,6 +33,7 @@ export function defaultInput(mode: Mode, today: string): SuggestInput {
     earliestStart: toIsoDate(mode === 'clt' ? cltEarliestStart(day) : addDays(day, PJ_LEAD_DAYS)),
     deadline: toIsoDate(deadline),
     workWeek: [...MON_FRI],
+    state: null,
     removedHolidays: [],
     extraDaysOff: [],
     limit: DEFAULT_LIMIT,

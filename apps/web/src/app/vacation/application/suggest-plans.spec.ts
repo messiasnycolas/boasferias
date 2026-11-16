@@ -8,6 +8,7 @@ const base: SuggestInput = {
   earliestStart: '2027-08-02',
   deadline: '2027-08-31',
   workWeek: [1, 2, 3, 4, 5],
+  state: null,
   removedHolidays: [],
   extraDaysOff: ['2027-08-13'],
   limit: 3,
@@ -42,6 +43,15 @@ describe('suggestPlans', () => {
     expect(result.holidays.map((h) => h.date)).toEqual(['2027-11-02', '2027-11-15', '2027-11-20']);
   });
 
+  it("adds the chosen state's holidays", () => {
+    const window = { earliestStart: '2027-07-01', deadline: '2027-07-31', extraDaysOff: [] };
+    const none = run(window);
+    const sp = run({ ...window, state: 'SP' });
+    if (!none.ok || !sp.ok) throw new Error('unexpected error');
+    expect(none.holidays).toEqual([]);
+    expect(sp.holidays).toEqual([{ date: '2027-07-09', name: 'Revolução Constitucionalista' }]);
+  });
+
   it('ignores removed holidays and counts extra days off', () => {
     const window = { earliestStart: '2027-11-08', deadline: '2027-11-30', extraDaysOff: [] };
     const withHoliday = run({ ...window, mode: 'pj', days: 1 });
@@ -74,6 +84,7 @@ describe('suggestPlans', () => {
       [{ workWeek: [7] }, 'invalid-work-week'],
       [{ limit: 0 }, 'invalid-limit'],
       [{ limit: 21 }, 'invalid-limit'],
+      [{ state: 'XX' as SuggestInput['state'] }, 'invalid-state'],
     ];
     for (const [change, error] of cases) {
       expect(run(change)).toEqual({ ok: false, error });

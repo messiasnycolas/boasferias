@@ -9,6 +9,7 @@
 | Dias a mais ("+14 dias")         | extra days (`extraDays`)       | Days off minus days spent. Shown as "+N dias"; the page never says "extra" or "folga"                       |
 | Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ: workdays                                                                |
 | Feriado                          | holiday                        | Default list in `calendar`; the user can remove or add days                                                   |
+| Estado                           | state (`Uf`)                   | Where the user works; adds the state's holidays ([holidays.md](holidays.md)). Optional, remembered on the device |
 | Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. City holidays wait for the city selector |
 | Ponte / emenda                   | bridge                         | Taking workdays between days off to join them                                                                 |
 | Repouso semanal remunerado (DSR) | rest day                       | Weekly paid rest, Sunday by default                                                                           |

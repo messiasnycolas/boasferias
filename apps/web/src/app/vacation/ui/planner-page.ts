@@ -16,6 +16,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
 import { LeaveError, expandLeave, groupLeave } from '../application/leave-days';
 import { planCalendar } from '../application/plan-calendar';
+import { Uf } from '../../calendar/domain/state-holidays';
 import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
 import {
   ERROR_MESSAGES,
@@ -31,6 +32,7 @@ import { BackToTop } from './back-to-top';
 import { DateField } from './date-field';
 import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
+import { STATE_OPTIONS, saveState, savedState } from './states';
 
 type WeekPreset = keyof typeof WORK_WEEKS | 'custom';
 
@@ -48,7 +50,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
   selector: 'app-planner-page',
   imports: [BackToTop, DateField, PlanMonths],
   templateUrl: './planner-page.html',
-  styleUrls: ['./planner-page.css', './switches.css'],
+  styleUrls: ['./planner-page.css', './switches.css', './location.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(window:scroll)': 'onScroll()', '[class.revealed]': 'revealed()' },
 })
@@ -91,6 +93,7 @@ export class PlannerPage {
   protected readonly formatRange = formatRange;
   protected readonly formatDate = formatDate;
   protected readonly formatDay = formatDay;
+  protected readonly states = STATE_OPTIONS;
   protected readonly planLetter = planLetter;
 
   protected readonly weekPreset = computed<WeekPreset>(() => {
@@ -145,6 +148,10 @@ export class PlannerPage {
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
+    if (this.client) {
+      const state = savedState();
+      if (state) this.patch({ state });
+    }
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.timer);
       this.client?.stop();
@@ -169,8 +176,20 @@ export class PlannerPage {
 
   protected setMode(mode: Mode): void {
     if (mode === this.form().mode) return;
-    const { workWeek, removedHolidays, extraDaysOff } = this.form();
-    this.form.set({ ...defaultInput(mode, todayIso()), workWeek, removedHolidays, extraDaysOff });
+    const { workWeek, state, removedHolidays, extraDaysOff } = this.form();
+    this.form.set({
+      ...defaultInput(mode, todayIso()),
+      workWeek,
+      state,
+      removedHolidays,
+      extraDaysOff,
+    });
+  }
+
+  protected setState(value: string): void {
+    const state = (value || null) as Uf | null;
+    saveState(state);
+    this.patch({ state });
   }
 
   protected step(field: 'days' | 'maxPeriods', delta: number): void {
