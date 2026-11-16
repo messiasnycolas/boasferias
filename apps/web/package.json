@@ -10,7 +10,8 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "holidays:cities": "esbuild scripts/city-holidays.ts --bundle --platform=node --format=esm --log-level=warning --outfile=tmp/city-holidays.mjs && node tmp/city-holidays.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.1",

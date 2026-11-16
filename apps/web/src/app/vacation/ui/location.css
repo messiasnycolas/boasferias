@@ -2,7 +2,7 @@
    which are at their size budget. */
 .place {
   min-width: 0;
-  flex: 0 1 auto;
+  flex: 0 1 14rem;
   min-height: 44px;
   padding: 0 36px 0 12px;
   border: 1.5px solid var(--edge);

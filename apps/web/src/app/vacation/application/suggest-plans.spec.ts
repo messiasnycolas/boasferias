@@ -9,6 +9,7 @@ const base: SuggestInput = {
   deadline: '2027-08-31',
   workWeek: [1, 2, 3, 4, 5],
   state: null,
+  city: null,
   removedHolidays: [],
   extraDaysOff: ['2027-08-13'],
   limit: 3,
@@ -52,6 +53,14 @@ describe('suggestPlans', () => {
     expect(sp.holidays).toEqual([{ date: '2027-07-09', name: 'Revolução Constitucionalista' }]);
   });
 
+  it("adds the chosen city's holidays", () => {
+    const window = { earliestStart: '2027-01-04', deadline: '2027-01-31', extraDaysOff: [] };
+    const city = [{ month: 1, day: 25, name: 'Aniversário da Cidade' }];
+    const result = run({ ...window, state: 'SP', city });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.holidays).toEqual([{ date: '2027-01-25', name: 'Aniversário da Cidade' }]);
+  });
+
   it('ignores removed holidays and counts extra days off', () => {
     const window = { earliestStart: '2027-11-08', deadline: '2027-11-30', extraDaysOff: [] };
     const withHoliday = run({ ...window, mode: 'pj', days: 1 });
@@ -85,6 +94,9 @@ describe('suggestPlans', () => {
       [{ limit: 0 }, 'invalid-limit'],
       [{ limit: 21 }, 'invalid-limit'],
       [{ state: 'XX' as SuggestInput['state'] }, 'invalid-state'],
+      [{ state: 'SP', city: [{ month: 13, day: 1, name: 'x' }] }, 'invalid-city'],
+      [{ state: 'SP', city: [{ easter: 0.5, name: 'x' }] }, 'invalid-city'],
+      [{ city: [] }, 'invalid-city'],
     ];
     for (const [change, error] of cases) {
       expect(run(change)).toEqual({ ok: false, error });

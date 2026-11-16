@@ -29,6 +29,7 @@ import {
   todayIso,
 } from './format';
 import { BackToTop } from './back-to-top';
+import { CityField } from './city-field';
 import { DateField } from './date-field';
 import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
@@ -48,7 +49,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
 
 @Component({
   selector: 'app-planner-page',
-  imports: [BackToTop, DateField, PlanMonths],
+  imports: [BackToTop, CityField, DateField, PlanMonths],
   templateUrl: './planner-page.html',
   styleUrls: ['./planner-page.css', './switches.css', './location.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -176,11 +177,12 @@ export class PlannerPage {
 
   protected setMode(mode: Mode): void {
     if (mode === this.form().mode) return;
-    const { workWeek, state, removedHolidays, extraDaysOff } = this.form();
+    const { workWeek, state, city, removedHolidays, extraDaysOff } = this.form();
     this.form.set({
       ...defaultInput(mode, todayIso()),
       workWeek,
       state,
+      city,
       removedHolidays,
       extraDaysOff,
     });
@@ -189,7 +191,7 @@ export class PlannerPage {
   protected setState(value: string): void {
     const state = (value || null) as Uf | null;
     saveState(state);
-    this.patch({ state });
+    this.patch({ state, city: null });
   }
 
   protected step(field: 'days' | 'maxPeriods', delta: number): void {

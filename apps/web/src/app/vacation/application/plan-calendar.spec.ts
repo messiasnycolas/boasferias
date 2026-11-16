@@ -32,6 +32,7 @@ describe('defaultInput', () => {
       deadline: '2028-01-09',
       workWeek: [1, 2, 3, 4, 5],
       state: null,
+      city: null,
       removedHolidays: [],
       extraDaysOff: [],
       limit: 3,

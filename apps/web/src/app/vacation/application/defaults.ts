@@ -34,6 +34,7 @@ export function defaultInput(mode: Mode, today: string): SuggestInput {
     deadline: toIsoDate(deadline),
     workWeek: [...MON_FRI],
     state: null,
+    city: null,
     removedHolidays: [],
     extraDaysOff: [],
     limit: DEFAULT_LIMIT,

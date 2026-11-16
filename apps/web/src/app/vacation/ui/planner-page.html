@@ -141,6 +141,12 @@
           }
         </select>
       </div>
+      <!-- The city field and its code load only once a state is chosen. -->
+      @if (form().state; as state) {
+        @defer (on immediate) {
+          <app-city-field [state]="state" (cityChange)="patch({ city: $event?.rules ?? null })" />
+        }
+      }
 
       <details class="more">
         <summary>

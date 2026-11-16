@@ -10,7 +10,8 @@
 | Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ: workdays                                                                |
 | Feriado                          | holiday                        | Default list in `calendar`; the user can remove or add days                                                   |
 | Estado                           | state (`Uf`)                   | Where the user works; adds the state's holidays ([holidays.md](holidays.md)). Optional, remembered on the device |
-| Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. City holidays wait for the city selector |
+| Cidade                           | city (`city`)                  | A city of the chosen state; adds its holidays and decides Corpus Christi ([holidays.md](holidays.md)). Optional, remembered on the device |
+| Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. Holidays of the chosen city are added on their own |
 | Ponte / emenda                   | bridge                         | Taking workdays between days off to join them                                                                 |
 | Repouso semanal remunerado (DSR) | rest day                       | Weekly paid rest, Sunday by default                                                                           |
 | Período concessivo               | concession period / deadline   | 12 months in which the employer must grant the vacation                                                       |

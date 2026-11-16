@@ -97,4 +97,5 @@ export const ERROR_MESSAGES: Record<SuggestError, string> = {
   'invalid-work-week': 'Marque pelo menos um dia de trabalho na semana.',
   'invalid-limit': 'Não foi possível calcular. Recarregue a página.',
   'invalid-state': 'Não foi possível calcular. Recarregue a página.',
+  'invalid-city': 'Não foi possível calcular. Recarregue a página.',
 };

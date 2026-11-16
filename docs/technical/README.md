@@ -29,6 +29,8 @@ Without Chrome's system libraries (WSL), run browser checks in Playwright's imag
 docker run --rm --ipc=host -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test
 ```
 
+City holidays live in `apps/web/public/holidays/<uf>.json`, generated from the pinned open dataset (ADR 0002): `npm run holidays:cities` (needs network) rewrites them; commit the result. The page fetches a state's file only when that state is chosen.
+
 The planner runs in a Web Worker (`src/app/vacation/ui/planner.worker.ts`); the UI calls only `vacation/application`. Plans are computed in the background from page load (the holiday list needs them) but shown only after the first "Ver melhores datas" click; after that they update live as the form changes.
 
 ## Deploy

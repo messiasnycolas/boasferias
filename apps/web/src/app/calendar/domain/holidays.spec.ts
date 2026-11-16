@@ -52,4 +52,18 @@ describe('holidays', () => {
     const es = holidays(2025, 'ES').filter((h) => toIsoDate(h.date) === '2025-04-21');
     expect(es.map((h) => h.name)).toEqual(['Tiradentes']);
   });
+
+  it('with a city: its holidays, Good Friday, and Corpus Christi only if the city has it', () => {
+    const anniversary = { month: 1, day: 25, name: 'Aniversário da Cidade' };
+    const list = (city: Parameters<typeof holidays>[2]) =>
+      holidays(2027, 'SP', city).map((h) => `${toIsoDate(h.date)} ${h.name}`);
+    const without = list([anniversary]);
+    expect(without).toContain('2027-01-25 Aniversário da Cidade');
+    expect(without).toContain('2027-03-26 Sexta-feira Santa');
+    expect(without).toContain('2027-07-09 Revolução Constitucionalista');
+    expect(without.some((h) => h.includes('Corpus Christi'))).toBe(false);
+    expect(list([anniversary, { easter: 60, name: 'Corpus Christi' }])).toContain(
+      '2027-05-27 Corpus Christi',
+    );
+  });
 });

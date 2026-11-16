@@ -655,6 +655,68 @@ test('the chosen state adds its holidays and is remembered on this device', asyn
   await expect(page.getByLabel('Estado')).toHaveValue('SP');
 });
 
+test.describe('city', () => {
+  const city = (page: Page) => page.getByRole('combobox', { name: 'Cidade' });
+
+  test('appears once a state is chosen and offers only its cities', async ({ page }) => {
+    await page.goto('/');
+    await expect(city(page)).toHaveCount(0);
+    await page.getByLabel('Estado').selectOption('SP');
+    await city(page).fill('campi');
+    const options = page.getByRole('listbox', { name: 'Cidades' }).getByRole('option');
+    await expect(options.getByText('Campinas', { exact: true })).toBeVisible();
+    await expect(options.filter({ hasText: 'Campina Grande' })).toHaveCount(0); // PB
+  });
+
+  test('picking one adds its holidays, drops the assumed Corpus Christi, and is remembered', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await page.getByLabel('Estado').selectOption('SP');
+    await city(page).fill('santos');
+    await city(page).press('ArrowDown');
+    await city(page).press('Enter');
+    await expect(city(page)).toHaveValue('Santos');
+    await expect(page.getByText('fonte comunitária')).toBeVisible();
+    await showPlans(page);
+    await page.getByText('Feriados no período').click();
+    const holidays = page.locator('.holidays');
+    await expect(holidays).toContainText('Monte Serrat'); // 8 Sep, Santos
+    await expect(holidays).toContainText('Revolução Constitucionalista');
+    await expect(holidays).toContainText('Sexta-feira Santa');
+    await expect(holidays).not.toContainText('Corpus Christi');
+
+    await page.reload();
+    await expect(city(page)).toHaveValue('Santos');
+
+    await page.getByLabel('Estado').selectOption('RJ');
+    await expect(city(page)).toHaveValue('');
+  });
+
+  test('works by keyboard and passes axe', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel('Estado').selectOption('SP');
+    await city(page).fill('santo');
+    await expect(city(page)).toHaveAttribute('aria-expanded', 'true');
+    await city(page).press('Escape');
+    await expect(city(page)).toHaveAttribute('aria-expanded', 'false');
+    const results = await new AxeBuilder({ page }).include('.form').analyze();
+    expect(results.violations).toEqual([]);
+  });
+
+  test('if the cities fail to load, the state still counts and plans still work', async ({
+    page,
+  }) => {
+    await page.route('**/holidays/*.json', (route) => route.abort());
+    await page.goto('/');
+    await page.getByLabel('Estado').selectOption('SP');
+    await expect(page.getByText('Não foi possível carregar as cidades')).toBeVisible();
+    await showPlans(page);
+    await page.getByText('Feriados no período').click();
+    await expect(page.locator('.holidays')).toContainText('Revolução Constitucionalista');
+  });
+});
+
 test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));

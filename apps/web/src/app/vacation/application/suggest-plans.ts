@@ -1,5 +1,5 @@
 import { DayNumber, parseIsoDate, toIsoDate, yearOf } from '../../calendar/domain/calendar-date';
-import { Holiday, holidays } from '../../calendar/domain/holidays';
+import { Holiday, HolidayRule, holidays } from '../../calendar/domain/holidays';
 import { STATES, Uf } from '../../calendar/domain/state-holidays';
 import {
   CLT_MAX_DAYS,
@@ -38,6 +38,8 @@ export interface SuggestInput {
   workWeek: readonly number[];
   /** Where the worker is: adds the state's holidays. */
   state: Uf | null;
+  /** The city's holidays, once a city in that state is chosen. */
+  city: readonly HolidayRule[] | null;
   removedHolidays: readonly string[];
   extraDaysOff: readonly string[];
   limit: number;
@@ -51,7 +53,8 @@ export type SuggestError =
   | 'invalid-periods'
   | 'invalid-work-week'
   | 'invalid-limit'
-  | 'invalid-state';
+  | 'invalid-state'
+  | 'invalid-city';
 
 export interface PeriodView {
   start: string;
@@ -85,6 +88,11 @@ function parseAll(values: readonly string[]): DayNumber[] | null {
   return days.every((day) => day !== null) ? (days as DayNumber[]) : null;
 }
 
+const validRule = (rule: HolidayRule) =>
+  rule.easter === undefined
+    ? isIntIn(rule.month, 1, 12) && isIntIn(rule.day, 1, 31)
+    : isIntIn(rule.easter, -366, 366);
+
 function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestError | null {
   const clt = input.mode === 'clt';
   if (to < from) return 'deadline-before-start';
@@ -99,6 +107,8 @@ function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestE
     return 'invalid-work-week';
   if (!isIntIn(input.limit, 1, MAX_LIMIT)) return 'invalid-limit';
   if (input.state !== null && !STATES.includes(input.state)) return 'invalid-state';
+  if (input.city !== null && (input.state === null || !input.city.every(validRule)))
+    return 'invalid-city';
   return null;
 }
 
@@ -115,7 +125,7 @@ function toPeriodView(c: Period): PeriodView {
 
 /** Default holidays around [from, to] and the resulting work calendar, after the user's changes. */
 export function holidayContext(
-  input: Pick<SuggestInput, 'workWeek' | 'state'>,
+  input: Pick<SuggestInput, 'workWeek' | 'state' | 'city'>,
   from: DayNumber,
   to: DayNumber,
   removed: readonly DayNumber[],
@@ -124,7 +134,7 @@ export function holidayContext(
   // One year of margin: blocks of days off may reach past the window.
   const defaults: Holiday[] = [];
   for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
-    defaults.push(...holidays(year, input.state ?? undefined));
+    defaults.push(...holidays(year, input.state ?? undefined, input.city ?? undefined));
   const removedSet = new Set(removed);
   const daysOff = new DaysOff(input.workWeek, [
     ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),

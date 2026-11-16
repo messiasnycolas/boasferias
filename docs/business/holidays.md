@@ -1,7 +1,9 @@
 # Holidays by place
 
 The planner starts from the national holidays plus Good Friday and Corpus Christi (see
-[clt-vacation.md](clt-vacation.md)). Choosing a state adds that state's holidays.
+[clt-vacation.md](clt-vacation.md)). Choosing a state adds that state's holidays. Choosing a city
+adds the city's, and from then on Corpus Christi counts only if the city has it (Good Friday stays:
+it is a city holiday nearly everywhere).
 
 ## What counts as a state holiday
 
@@ -61,3 +63,14 @@ that week's Friday, except the state anniversary (15 Jun). Several in one week t
 days ending on Friday, skipping days already off. 2026: Dia do Católico (Tue 20 Jan) on Thu 22,
 since Dia do Evangélico holds Fri 23; Tratado de Petrópolis (Tue 17 Nov) on Thu 19, since Fri 20
 is national.
+
+## Cities
+
+Source: the open dataset joaopbini/feriados-brasil (MIT), pinned in `apps/web/scripts/city-holidays.ts`
+(ADR 0002). It lists dated holidays per year for about 3,840 of the 5,570 cities. A day becomes a
+yearly rule when 2025 and 2026 both have it on the same date, or at the same distance from Easter
+(about 96% of the entries); anything else is dropped. Its generic name "Feriado Municipal" is shown
+as "Feriado municipal".
+
+The dataset is not verified: the page says so under the city ("fonte comunitária; confira com sua
+empresa"), and for a city with no data it asks the user to add the days in "Mais filtros".
