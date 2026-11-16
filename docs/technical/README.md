@@ -4,30 +4,26 @@ Angular app in `apps/web`, prerendered at build time to static HTML and served b
 
 ## Run
 
-```sh
-docker compose up        # http://localhost:4200, hot reload
-```
+| Command       | What                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| `make setup`  | Once: Node from `apps/web/.nvmrc` (via nvm), `npm ci`, the Playwright image, the git hooks |
+| `make run`    | Dev server with hot reload on http://localhost:4200 (Docker)                               |
+| `make check`  | Fast loop: format, lint, unit tests                                                        |
+| `make verify` | The full deploy gate: also `npm audit`, build, e2e, Lighthouse. Runs before every push     |
 
-Without Docker: `cd apps/web && npm ci && npm start` (Node version in `apps/web/.nvmrc`).
+`make check` and `make verify` print one line per step; a failing step prints the tail of its log, kept in `apps/web/tmp/verify/<step>.log`. CI runs the same `make verify`.
 
-## Test and check
+| Step         | What                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------- |
+| `format`     | Prettier (`npm run format` in `apps/web` fixes)                                         |
+| `lint`       | ESLint (angular-eslint)                                                                 |
+| `unit`       | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders             |
+| `audit`      | `npm audit`, high severity and up                                                       |
+| `build`      | Prerendered output in `dist/web/browser`                                                |
+| `e2e`        | Playwright + axe on the built page; main journey, states, 320 and 360 px, 44 px targets |
+| `lighthouse` | Budgets from `lighthouserc.json`                                                        |
 
-From `apps/web`:
-
-| Command                        | What                                                                                                            |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `npm test`                     | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders                                     |
-| `npm run lint`                 | ESLint (angular-eslint)                                                                                         |
-| `npm run format:check`         | Prettier (`npm run format` fixes)                                                                               |
-| `npm run build`                | Prerendered output in `dist/web/browser`                                                                        |
-| `npm run e2e`                  | Playwright + axe on the built page (`npm run build` first); main journey, states, 320 and 360 px, 44 px targets |
-| `npx @lhci/cli@0.16.1 autorun` | Lighthouse budgets from `lighthouserc.json` (needs Chrome; runs in CI)                                          |
-
-Without Chrome's system libraries (WSL), run browser checks in Playwright's image:
-
-```sh
-docker run --rm --ipc=host -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.65.1-noble npx playwright test
-```
+Locally, `e2e` and `lighthouse` run in Playwright's Docker image (WSL lacks Chrome's system libraries); CI installs Chromium natively. The pre-push gate runs only when the pushed commits touch what CI gates, and checks the working tree, so commit or stash other work first; skip it once with `git push --no-verify`.
 
 City holidays live in `apps/web/public/holidays/<uf>.json`, generated from the pinned open dataset (ADR 0002): `npm run holidays:cities` (needs network) rewrites them; commit the result. The page fetches a state's file only when that state is chosen.
 
@@ -35,7 +31,7 @@ The planner runs in a Web Worker (`src/app/vacation/ui/planner.worker.ts`); the 
 
 ## Deploy
 
-Push to `main` touching `apps/web/**` or `firebase.json` runs `.github/workflows/web.yml`: the gate above plus `npm audit`, then deploys to Firebase Hosting. Deploy runs only on pushes to `main`, never on pull requests. No credentials in the repo: GitHub Actions gets a short-lived token through Workload Identity Federation.
+Push to `main` touching `apps/web/**`, `firebase.json`, `Makefile` or `scripts/**` runs `.github/workflows/web.yml`: `make verify`, then deploys to Firebase Hosting. Deploy runs only on pushes to `main`, never on pull requests. No credentials in the repo: GitHub Actions gets a short-lived token through Workload Identity Federation.
 
 Rollback: revert the commit, or roll back the release in the Firebase console (Hosting > Release history).
 

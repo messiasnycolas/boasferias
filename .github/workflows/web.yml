@@ -3,9 +3,23 @@ name: web
 on:
   push:
     branches: [main]
-    paths: ['apps/web/**', 'firebase.json', '.github/workflows/web.yml']
+    paths:
+      [
+        "apps/web/**",
+        "firebase.json",
+        "Makefile",
+        "scripts/**",
+        ".github/workflows/web.yml",
+      ]
   pull_request:
-    paths: ['apps/web/**', 'firebase.json', '.github/workflows/web.yml']
+    paths:
+      [
+        "apps/web/**",
+        "firebase.json",
+        "Makefile",
+        "scripts/**",
+        ".github/workflows/web.yml",
+      ]
 
 permissions:
   contents: read
@@ -32,15 +46,15 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
       - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm test -- --watch=false
-      - run: npm run build
-      - run: npm audit --audit-level=high
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
-      # Run via npx so its dependency tree stays out of the app's audit.
-      - run: npx -y @lhci/cli@0.16.1 autorun
+      # The same gate as local `make verify`, so the two cannot drift.
+      - run: make verify
+        working-directory: .
+      - if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verify-logs
+          path: apps/web/tmp/verify
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: web-dist

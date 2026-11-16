@@ -695,17 +695,18 @@ test.describe('city', () => {
 
   test('a capital is checked against city law: no community-source hint', async ({ page }) => {
     await page.goto('/');
-    await page.getByLabel('Estado').selectOption('SP');
-    await city(page).fill('são paulo');
+    await page.getByLabel('Estado').selectOption('RR');
+    await city(page).fill('boa vista');
     await page
       .getByRole('listbox', { name: 'Cidades' })
-      .getByText('São Paulo', { exact: true })
+      .getByText('Boa Vista', { exact: true })
       .click();
-    await expect(city(page)).toHaveValue('São Paulo');
+    await expect(city(page)).toHaveValue('Boa Vista');
     await expect(page.getByText('fonte comunitária')).toHaveCount(0);
     await showPlans(page);
     await page.getByText('Feriados no período').click();
-    await expect(page.locator('.holidays')).toContainText('Aniversário de São Paulo');
+    // Only the checked rules have it; the community dataset missed it.
+    await expect(page.locator('.holidays')).toContainText('Aniversário de Boa Vista');
   });
 
   test('Brasília has no city holidays and no hint asking for them', async ({ page }) => {

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# The full deploy gate before a push that CI would gate (enabled by make setup). It checks the
+# working tree, so commit or stash other work first. Skip once: git push --no-verify.
+set -euo pipefail
+gated='^(apps/web/|firebase\.json$|Makefile$|scripts/|\.github/workflows/web\.yml$)'
+zero=0000000000000000000000000000000000000000
+run=0
+while read -r _ local_sha _ remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # deleting a branch
+  if [ "$remote_sha" = "$zero" ]; then run=1; continue; fi # new branch: no base to compare
+  git diff --name-only "$remote_sha" "$local_sha" | grep -Eq "$gated" && run=1
+done
+[ "$run" = 1 ] || { echo "pre-push: no gated paths changed, skipping make verify"; exit 0; }
+git diff --quiet HEAD || echo "pre-push: uncommitted changes are part of this check" >&2
+exec make --no-print-directory -C "$(git rev-parse --show-toplevel)" verify
