@@ -43,7 +43,7 @@ days by state law. They are listed because they are observed (state government a
 | PR | none (19 Dec stopped being a holiday, Lei 18.384/2014) | |
 | PE | 6 Mar Revolução Pernambucana (Lei 16.241/2017: the only state holiday; 24 Jun is Recife's) | Lei 13.835/2009 |
 | PI | 19 Oct Dia do Piauí | Lei 176/1937 |
-| RJ | Carnaval Tuesday; 23 Apr São Jorge | Leis 5.243/2008, 5.198/2008 |
+| RJ | Carnaval Tuesday; 23 Apr São Jorge; Corpus Christi from 2026 | Leis 5.243/2008, 5.198/2008, 11.002/2025 (upheld by the STF, ADI 7898) |
 | RN | 7 Aug Dia do RN; 3 Oct Mártires de Cunhaú e Uruaçu | Leis 7.831/2000, 8.913/2006 |
 | RS | 20 Sep Revolução Farroupilha | Constituição art. 6º |
 | RO | 4 Jan Criação do Estado; 18 Jun Dia do Evangélico | Leis 2.291/2010, 1.026/2001 |
@@ -74,3 +74,46 @@ as "Feriado municipal".
 
 The dataset is not verified: the page says so under the city ("fonte comunitária; confira com sua
 empresa"), and for a city with no data it asks the user to add the days in "Mais filtros".
+
+### Capitals (checked Nov 2026)
+
+Each capital's days are checked against city law, the city's yearly decree, or a court calendar
+that cites the law, and replace the dataset's entry (`CAPITALS` in
+`apps/web/src/app/calendar/domain/capital-holidays.ts`); the page shows no "fonte comunitária"
+hint for them. Good Friday is national in the app, and days that are already national or state
+are not repeated. Corpus Christi is listed only where the city (or, in RJ, the state) declares it.
+
+| Capital | Own days | Source |
+|---|---|---|
+| Rio Branco (AC) | 28 Dec Aniversário | Lei 330 (TJAC calendar) |
+| Maceió (AL) | Corpus Christi; 27 Aug N. Sra. dos Prazeres; 8 Dec N. Sra. da Conceição | Lei 1.391/1967; Decreto 10.234/2025 |
+| Macapá (AP) | 4 Feb Aniversário; Corpus Christi | Portaria SJAP-Diref 2/2025; Corpus Christi per the 2025 Valor/Demarest survey of capitals |
+| Manaus (AM) | Carnaval Tuesday; Corpus Christi; 24 Oct Aniversário; 8 Dec N. Sra. da Conceição | Leis 448/1998, 970/2006, 496/1999; Lei Orgânica art. 437 (city decree of 31 Jan 2025) |
+| Salvador (BA) | Corpus Christi; 24 Jun São João; 8 Dec N. Sra. da Conceição da Praia | Lei 1.997/1967 (Portaria SJBA-Diref 25/2025) |
+| Fortaleza (CE) | 19 Mar São José; Corpus Christi; 15 Aug N. Sra. da Assunção | Lei 8.796/2003 |
+| Brasília (DF) | none (no city tier; Corpus Christi is a ponto facultativo) | |
+| Vitória (ES) | Corpus Christi; 8 Sep N. Sra. da Vitória | Lei 1.732/1967 (TJES Ato 176/2026) |
+| Goiânia (GO) | 24 May N. Sra. Auxiliadora; Corpus Christi; 24 Oct Aniversário | Lei 100/1951 art. 3º (Corpus Christi); SJGO and TJGO calendars |
+| São Luís (MA) | 29 Jun São Pedro; 8 Sep Aniversário; 8 Dec N. Sra. da Conceição | TJMA Resolução GP 131/2025; MPF-MA calendar 2026. Corpus Christi is a ponto facultativo |
+| Cuiabá (MT) | 8 Apr Aniversário; Corpus Christi; 8 Dec N. Sra. da Conceição | Decreto 11.585/2025 |
+| Campo Grande (MS) | 13 Jun Santo Antônio; 26 Aug Aniversário | Lei 3.901/2001; Decreto 16.469/2025 makes Corpus Christi a ponto facultativo |
+| Belo Horizonte (MG) | Corpus Christi; 15 Aug Assunção; 8 Dec Imaculada Conceição | Lei 11.397/2022, Anexo V |
+| Belém (PA) | Corpus Christi; 8 Dec N. Sra. da Conceição | Lei 6.306/1967 (Portaria SJPA-Diref 17/2025). 12 Jan is a ponto facultativo |
+| João Pessoa (PB) | 24 Jun São João; 8 Dec N. Sra. da Conceição | Lei 13.768/2019 (MPF-PB calendar) |
+| Curitiba (PR) | Corpus Christi; 8 Sep N. Sra. da Luz dos Pinhais | Lei 3.015/1967; Decreto 2.385/2025 |
+| Recife (PE) | 24 Jun São João; 16 Jul N. Sra. do Carmo; 8 Dec N. Sra. da Conceição | Lei 9.777/1967 |
+| Teresina (PI) | Corpus Christi; 16 Aug Aniversário; 8 Dec N. Sra. da Conceição | Lei 2.275/1994 (TRE-PI Portaria 479/2025); Corpus Christi per the Valor/Demarest survey |
+| Rio de Janeiro (RJ) | 20 Jan São Sebastião | Lei 1.271/1988 |
+| Natal (RN) | 6 Jan Santos Reis; Corpus Christi; 21 Nov N. Sra. da Apresentação | City holiday calendar (Prefeitura do Natal); TJRN |
+| Porto Alegre (RS) | 2 Feb N. Sra. dos Navegantes; Corpus Christi | Lei 3.033/1967 (as amended by Lei 13.591/2023) |
+| Porto Velho (RO) | 24 Jan Instalação; 24 May N. Sra. Auxiliadora; 2 Oct Criação do Município | Lei 190/1980 (TJRO and SJRO calendars) |
+| Boa Vista (RR) | 20 Jan São Sebastião; Corpus Christi; 29 Jun São Pedro; 9 Jul Aniversário; 8 Dec N. Sra. da Conceição | Decreto 123/E/2025 |
+| Florianópolis (SC) | 23 Mar Aniversário; Corpus Christi | Lei 832/1967 (as amended by Lei 8.046/2009) |
+| São Paulo (SP) | 25 Jan Aniversário; Corpus Christi | Lei 14.485/2007, art. 10; Decreto 64.862/2025 |
+| Aracaju (SE) | 17 Mar Aniversário; Corpus Christi; 24 Jun São João | Lei 3.805/2009 (TRE-SE calendars) |
+| Palmas (TO) | 19 Mar São José; 20 May Aniversário | Lei 577/1996 (SJTO portaria) |
+
+Left out: Fortaleza's 13 Apr 2026 (Lei 11.649/2026, the 300th anniversary, that year only) and
+days only for public servants. Weakest sources: Corpus Christi in Macapá and Teresina rests on a
+2025 survey, not a law text; recheck them each year.
+

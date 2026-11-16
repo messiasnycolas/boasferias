@@ -1,8 +1,10 @@
 /**
  * Writes public/holidays/<uf>.json: each state's cities and their holidays as yearly rules, from
- * the open dataset joaopbini/feriados-brasil (MIT), pinned below. Run: npm run holidays:cities
+ * the open dataset joaopbini/feriados-brasil (MIT), pinned below; each capital's entry is replaced
+ * by its checked rules (CAPITALS) and marked verified. Run: npm run holidays:cities
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { CAPITALS } from '../src/app/calendar/domain/capital-holidays';
 import { dayOf } from '../src/app/calendar/domain/calendar-date';
 import { Holiday } from '../src/app/calendar/domain/holiday-rules';
 import { inferRules } from '../src/app/calendar/domain/infer-rules';
@@ -57,11 +59,13 @@ for (const uf of STATES) {
   const list = cities
     .filter((c) => ufOf.get(c.codigo_uf) === uf)
     .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-    .map((c) => ({
-      id: c.codigo_ibge,
-      name: c.nome,
-      rules: inferRules(byCity.get(c.codigo_ibge) ?? {}),
-    }));
+    .map((c) =>
+      c.codigo_ibge === CAPITALS[uf].id
+        ? { id: c.codigo_ibge, name: c.nome, rules: CAPITALS[uf].rules, verified: true }
+        : { id: c.codigo_ibge, name: c.nome, rules: inferRules(byCity.get(c.codigo_ibge) ?? {}) },
+    );
+  if (!list.some((c) => c.verified))
+    throw new Error(`${uf}: capital ${CAPITALS[uf].name} not found`);
   const file = { source: `joaopbini/feriados-brasil@${COMMIT.slice(0, 7)} (MIT)`, cities: list };
   writeFileSync(`${OUT}/${uf.toLowerCase()}.json`, JSON.stringify(file));
 }

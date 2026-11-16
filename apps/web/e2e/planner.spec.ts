@@ -693,6 +693,33 @@ test.describe('city', () => {
     await expect(city(page)).toHaveValue('');
   });
 
+  test('a capital is checked against city law: no community-source hint', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel('Estado').selectOption('SP');
+    await city(page).fill('são paulo');
+    await page
+      .getByRole('listbox', { name: 'Cidades' })
+      .getByText('São Paulo', { exact: true })
+      .click();
+    await expect(city(page)).toHaveValue('São Paulo');
+    await expect(page.getByText('fonte comunitária')).toHaveCount(0);
+    await showPlans(page);
+    await page.getByText('Feriados no período').click();
+    await expect(page.locator('.holidays')).toContainText('Aniversário de São Paulo');
+  });
+
+  test('Brasília has no city holidays and no hint asking for them', async ({ page }) => {
+    await page.goto('/');
+    await page.getByLabel('Estado').selectOption('DF');
+    await city(page).fill('brasília');
+    await page
+      .getByRole('listbox', { name: 'Cidades' })
+      .getByText('Brasília', { exact: true })
+      .click();
+    await expect(city(page)).toHaveValue('Brasília');
+    await expect(page.getByText(/Não temos os feriados|fonte comunitária/)).toHaveCount(0);
+  });
+
   test('works by keyboard and passes axe', async ({ page }) => {
     await page.goto('/');
     await page.getByLabel('Estado').selectOption('SP');

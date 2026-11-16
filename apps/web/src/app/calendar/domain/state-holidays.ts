@@ -1,5 +1,5 @@
 import { addDays, weekday } from './calendar-date';
-import { Holiday, HolidayRule, holidaysOf } from './holiday-rules';
+import { CORPUS_CHRISTI, Holiday, HolidayRule, holidaysOf } from './holiday-rules';
 import { nationalHolidays } from './national-holidays';
 
 export const STATES = [
@@ -52,6 +52,7 @@ const RULES: Record<Uf, readonly HolidayRule[]> = {
   RJ: [
     { easter: -47, name: 'Carnaval' }, // Lei 5.243/2008
     { month: 4, day: 23, name: 'São Jorge' }, // Lei 5.198/2008
+    { ...CORPUS_CHRISTI, since: 2026 }, // Lei 11.002/2025, upheld in ADI 7898
   ],
   RN: [
     { month: 8, day: 7, name: 'Dia do Rio Grande do Norte' }, // Lei 7.831/2000

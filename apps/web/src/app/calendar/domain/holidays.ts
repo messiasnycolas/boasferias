@@ -1,4 +1,4 @@
-import { HolidayRule, Holiday, holidaysOf } from './holiday-rules';
+import { CORPUS_CHRISTI, HolidayRule, Holiday, holidaysOf } from './holiday-rules';
 import { NATIONAL } from './national-holidays';
 import { Uf, stateHolidays } from './state-holidays';
 
@@ -7,7 +7,6 @@ export type { Holiday, HolidayRule } from './holiday-rules';
 
 /** City holidays in practice across the target capitals (see docs/business/clt-vacation.md). */
 const GOOD_FRIDAY: HolidayRule = { easter: -2, name: 'Sexta-feira Santa' };
-const CORPUS_CHRISTI: HolidayRule = { easter: 60, name: 'Corpus Christi' };
 
 /**
  * Holidays for a year: national ones plus Good Friday, the state's when one is chosen, and the

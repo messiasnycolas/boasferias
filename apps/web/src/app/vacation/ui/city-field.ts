@@ -65,10 +65,13 @@ const MAX_OPTIONS = 8;
         Não foi possível carregar as cidades. Os feriados do estado continuam valendo.
       </p>
     } @else if (chosen(); as city) {
-      @if (!city.rules.length) {
-        <p class="hint">Não temos os feriados desta cidade. Adicione-os em "Mais filtros".</p>
-      } @else if (!city.verified) {
-        <p class="hint">Feriados da cidade de fonte comunitária; confira com sua empresa.</p>
+      <!-- A verified city (a capital) needs no hint, even with no city days (Brasília). -->
+      @if (!city.verified) {
+        @if (!city.rules.length) {
+          <p class="hint">Não temos os feriados desta cidade. Adicione-os em "Mais filtros".</p>
+        } @else {
+          <p class="hint">Feriados da cidade de fonte comunitária; confira com sua empresa.</p>
+        }
       }
     }
   `,

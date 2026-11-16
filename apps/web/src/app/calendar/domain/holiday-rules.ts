@@ -14,6 +14,9 @@ export type HolidayRule = (
   since?: number;
 };
 
+/** A city holiday in most capitals and, from 2026, a state holiday in Rio de Janeiro. */
+export const CORPUS_CHRISTI: HolidayRule = { easter: 60, name: 'Corpus Christi' };
+
 /** Easter Sunday, anonymous Gregorian algorithm. */
 export function easter(year: number): DayNumber {
   const a = year % 19;
