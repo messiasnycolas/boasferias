@@ -717,6 +717,16 @@ test.describe('city', () => {
   });
 });
 
+for (const width of [320, 360, 412]) {
+  test(`at ${width} px the whole "Compartilhar" label shows`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/');
+    await showPlans(page);
+    const share = firstPlan(page).getByRole('button', { name: 'Compartilhar' });
+    expect(await share.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  });
+}
+
 test.describe('sharing on desktop', () => {
   test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
   test.beforeEach(async ({ page }) => showPlans(page));

@@ -198,6 +198,12 @@ app-planner-page .raised::after {
   transform: translate(-55%, 55%);
 }
 
+/* overflow: hidden lets a flex item shrink below its label: on the days row Compartilhar keeps its
+   width and the days count wraps instead. */
+app-planner-page .days-row > .raised {
+  flex-shrink: 0;
+}
+
 @media (hover: hover) {
   app-planner-page .raised:not([aria-disabled='true']):hover::after {
     transform: translate(55%, -55%);
