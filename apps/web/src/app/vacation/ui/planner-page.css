@@ -141,17 +141,24 @@ legend {
 .field.stacked {
   display: grid;
   justify-content: stretch;
-  gap: 8px;
+  /* A label hugs its control; groups sit 24 px apart. */
+  gap: 6px;
   border: 0;
   /* Margin, not padding: a fieldset's legend ignores its top padding. */
-  margin: 20px 0 0;
+  margin: 24px 0 0;
   padding: 0;
   min-width: 0;
 }
 
 legend {
   padding: 0;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+/* A group of fields gets a title, not a label. */
+.group > legend {
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .stepper {
@@ -269,16 +276,23 @@ svg {
   transform: rotate(180deg);
 }
 
-/* Side by side only when both date fields fit. */
 /* Each date field is as wide as "dd/mm/aaaa" and its calendar button; two sit side by side when they fit. */
 .dates {
   display: grid;
   grid-template-columns: repeat(auto-fill, 10rem);
-  gap: 12px;
+  gap: 16px 12px;
+}
+
+.dates > .field {
+  margin: 0;
+}
+
+.more > .dates {
+  margin-top: 4px;
 }
 
 .hint {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-size: 13px;
   color: var(--muted);
 }
@@ -340,6 +354,11 @@ svg {
 
 .add-leave {
   justify-self: start;
+  margin-top: 6px;
+}
+
+legend + .hint {
+  margin: 0 0 6px;
 }
 
 .hint.error {
