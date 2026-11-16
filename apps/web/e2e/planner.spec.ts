@@ -274,6 +274,24 @@ test.describe('before the first click', () => {
     ).toBe(true);
   });
 
+  test('on a phone nothing slides: no transition, the page glides to the plans at once', async ({
+    page,
+  }) => {
+    await countTransitions(page);
+    await page.reload();
+    await page.getByRole('button', { name: 'Ver melhores datas' }).click();
+    await expect.poll(() => page.evaluate(() => scrollY), { timeout: 300 }).toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        page.locator('.results').evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+      )
+      .toBe(16);
+    await expect(page.locator('.results')).toBeFocused();
+    expect(
+      await page.evaluate(() => (window as unknown as { transitions: number }).transitions),
+    ).toBe(0);
+  });
+
   test('with reduced motion the plans appear at once', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await countTransitions(page);

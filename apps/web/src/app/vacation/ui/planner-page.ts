@@ -223,12 +223,24 @@ export class PlannerPage {
       this.compute(this.form());
     }
     const focus = () => this.results()?.nativeElement.focus();
-    if (this.revealed() || !document.startViewTransition || reducedMotion()) {
+    const glide = () => {
+      const results = this.results()?.nativeElement;
+      results?.focus({ preventScroll: true });
+      results?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    };
+    if (this.revealed() || reducedMotion()) {
       this.revealed.set(true);
       afterNextRender(focus, { injector: this.injector });
       return;
     }
-    // The first reveal animates: the browser snapshots the page, Angular renders, then it morphs.
+    // Phones: the plans open under the form, nothing slides, so the page glides there at once.
+    if (!document.startViewTransition || !sideBySide()) {
+      this.revealed.set(true);
+      afterNextRender(glide, { injector: this.injector });
+      return;
+    }
+    // Desktop: the first reveal animates. The browser snapshots the page, Angular renders, then it
+    // morphs.
     // The page holds still while it morphs; on desktop the form now scrolls inside itself and keeps
     // showing its end, where the button was clicked, so it slides without changing. Only then does
     // the page glide to the plans.
@@ -245,11 +257,7 @@ export class PlannerPage {
           { injector: this.injector },
         );
       });
-    document
-      .startViewTransition(reveal)
-      .finished.then(() =>
-        this.results()?.nativeElement.scrollIntoView({ block: 'start', behavior: 'smooth' }),
-      );
+    document.startViewTransition(reveal).finished.then(glide);
   }
 
   /** Opens a plan on the calendar and brings that calendar to the top of the screen. */
@@ -331,6 +339,11 @@ function download(file: File): void {
   link.download = file.name;
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+/** Form and plans side by side (the page's 960 px breakpoint). */
+function sideBySide(): boolean {
+  return window.matchMedia('(min-width: 960px)').matches;
 }
 
 function reducedMotion(): boolean {

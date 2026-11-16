@@ -134,6 +134,12 @@ app-planner-page .results {
   scroll-margin-top: 16px;
 }
 
+/* While the plans are calculated the section holds a screen's height, so the glide to it reaches
+   its place instead of stopping where the page used to end. */
+app-planner-page .results[aria-busy='true'] {
+  min-height: 100dvh;
+}
+
 ::view-transition-group(*) {
   animation-duration: 450ms;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
