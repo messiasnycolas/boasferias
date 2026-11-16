@@ -52,21 +52,6 @@
     <h2 class="card-head" #formTitle tabindex="-1">Suas férias</h2>
     <div class="card-body">
       <div class="field">
-        <label for="state">Estado</label>
-        <select
-          id="state"
-          class="place"
-          [value]="form().state ?? ''"
-          (change)="setState($any($event.target).value)"
-        >
-          <option value="">Escolha</option>
-          @for (s of states; track s.uf) {
-            <option [value]="s.uf">{{ s.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div class="field">
         <label for="days">{{
           form().mode === 'clt' ? 'Dias de férias' : 'Dias úteis de descanso'
         }}</label>
@@ -141,6 +126,21 @@
           />
         </label>
       }
+
+      <div class="field">
+        <label for="state">Estado</label>
+        <select
+          id="state"
+          class="place"
+          [value]="form().state ?? ''"
+          (change)="setState($any($event.target).value)"
+        >
+          <option value="">Escolha</option>
+          @for (s of states; track s.uf) {
+            <option [value]="s.uf">{{ s.name }}</option>
+          }
+        </select>
+      </div>
 
       <details class="more">
         <summary>
