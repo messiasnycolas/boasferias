@@ -18,7 +18,7 @@ Angular app in `apps/web`, prerendered at build time to static HTML and served b
 | `format`     | Prettier (`npm run format` in `apps/web` fixes)                                                                                                                 |
 | `lint`       | ESLint (angular-eslint)                                                                                                                                         |
 | `unit`       | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders                                                                                     |
-| `audit`      | `npm audit`, high severity and up                                                                                                                               |
+| `audit`      | `npm audit` of production dependencies, high severity and up; dev-tool advisories come through Dependabot                                                       |
 | `build`      | Prerendered output in `dist/web/browser`                                                                                                                        |
 | `e2e`        | Playwright + axe on the built page; main journey, states, 320 and 360 px, 44 px targets; layout rules (no sideways scroll, cut-off text or overlap) at 5 widths |
 | `lighthouse` | Budgets from `lighthouserc.json`                                                                                                                                |

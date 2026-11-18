@@ -52,7 +52,8 @@ step lint npm run lint
 step unit npm test -- --watch=false
 
 if [ "${1:-verify}" = verify ]; then
-  step audit npm audit --audit-level=high
+  # Production dependencies only: the site ships static files, dev tools never reach users.
+  step audit npm audit --omit=dev --audit-level=high
   if step build npm run build; then
     step e2e browser npx playwright test
     step lighthouse lighthouse
