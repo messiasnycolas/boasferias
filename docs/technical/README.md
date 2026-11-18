@@ -13,15 +13,15 @@ Angular app in `apps/web`, prerendered at build time to static HTML and served b
 
 `make check` and `make verify` print one line per step; a failing step prints the tail of its log, kept in `apps/web/tmp/verify/<step>.log`. CI runs the same `make verify`.
 
-| Step         | What                                                                                    |
-| ------------ | --------------------------------------------------------------------------------------- |
-| `format`     | Prettier (`npm run format` in `apps/web` fixes)                                         |
-| `lint`       | ESLint (angular-eslint)                                                                 |
-| `unit`       | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders             |
-| `audit`      | `npm audit`, high severity and up                                                       |
-| `build`      | Prerendered output in `dist/web/browser`                                                |
-| `e2e`        | Playwright + axe on the built page; main journey, states, 320 and 360 px, 44 px targets |
-| `lighthouse` | Budgets from `lighthouserc.json`                                                        |
+| Step         | What                                                                                                                                                            |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`     | Prettier (`npm run format` in `apps/web` fixes)                                                                                                                 |
+| `lint`       | ESLint (angular-eslint)                                                                                                                                         |
+| `unit`       | Unit tests; coverage must be >= 95% on `domain/` and `application/` folders                                                                                     |
+| `audit`      | `npm audit`, high severity and up                                                                                                                               |
+| `build`      | Prerendered output in `dist/web/browser`                                                                                                                        |
+| `e2e`        | Playwright + axe on the built page; main journey, states, 320 and 360 px, 44 px targets; layout rules (no sideways scroll, cut-off text or overlap) at 5 widths |
+| `lighthouse` | Budgets from `lighthouserc.json`                                                                                                                                |
 
 Locally, `e2e` and `lighthouse` run in Playwright's Docker image (WSL lacks Chrome's system libraries); CI installs Chromium natively. The pre-push gate runs only when the pushed commits touch what CI gates, and checks the working tree, so commit or stash other work first; skip it once with `git push --no-verify`.
 
