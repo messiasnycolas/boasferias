@@ -17,6 +17,7 @@ import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults
 import { CREDIT_MAX_DAYS } from '../domain/credit';
 import { LeaveError, MAX_LEAVE_RUNS, expandLeave, groupLeave } from '../application/leave-days';
 import { planCalendar } from '../application/plan-calendar';
+import { parseIsoDate } from '../../calendar/domain/calendar-date';
 import { Uf } from '../../calendar/domain/state-holidays';
 import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
 import {
@@ -95,6 +96,9 @@ export class PlannerPage {
     const days = this.leaveDays();
     return !!days && groupLeave([...this.form().leaveDays, ...days]).length <= MAX_LEAVE_RUNS;
   });
+  /** "Adicionar feriado": the day typed, ISO once complete. */
+  protected readonly holidayDate = signal('');
+  protected readonly canAddHoliday = computed(() => parseIsoDate(this.holidayDate()) !== null);
   protected readonly maxLeaveRuns = MAX_LEAVE_RUNS;
   protected readonly creditMax = CREDIT_MAX_DAYS;
 
@@ -186,13 +190,14 @@ export class PlannerPage {
 
   protected setMode(mode: Mode): void {
     if (mode === this.form().mode) return;
-    const { workWeek, state, city, removedHolidays, leaveDays } = this.form();
+    const { workWeek, state, city, removedHolidays, addedHolidays, leaveDays } = this.form();
     this.form.set({
       ...defaultInput(mode, todayIso()),
       workWeek,
       state,
       city,
       removedHolidays,
+      addedHolidays,
       leaveDays,
     });
   }
@@ -237,6 +242,23 @@ export class PlannerPage {
         ? removed.filter((d) => d !== date)
         : [...removed, date],
     });
+  }
+
+  protected addHoliday(): void {
+    const date = this.holidayDate();
+    if (!this.canAddHoliday()) return;
+    const { removedHolidays, addedHolidays } = this.form();
+    const listed = this.holidays().find((h) => h.date === date);
+    if (listed && !listed.added && removedHolidays.includes(date)) {
+      this.patch({ removedHolidays: removedHolidays.filter((d) => d !== date) });
+    } else if (!listed && !addedHolidays.includes(date)) {
+      this.patch({ addedHolidays: [...addedHolidays, date].sort() });
+    }
+    this.holidayDate.set('');
+  }
+
+  protected removeAddedHoliday(date: string): void {
+    this.patch({ addedHolidays: this.form().addedHolidays.filter((d) => d !== date) });
   }
 
   protected addLeave(): void {

@@ -68,7 +68,9 @@ const MAX_OPTIONS = 8;
       <!-- A verified city (a capital) needs no hint, even with no city days (Brasília). -->
       @if (!city.verified) {
         @if (!city.rules.length) {
-          <p class="hint">Não temos os feriados desta cidade. Adicione-os em "Mais filtros".</p>
+          <p class="hint">
+            Não temos os feriados desta cidade. Adicione-os em "Feriados no período".
+          </p>
         } @else {
           <p class="hint">Feriados da cidade de fonte comunitária; confira com sua empresa.</p>
         }

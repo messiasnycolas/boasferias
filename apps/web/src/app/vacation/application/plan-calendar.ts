@@ -5,7 +5,7 @@ import {
   toIsoDate,
   weekday,
 } from '../../calendar/domain/calendar-date';
-import { PlanView, SuggestInput, holidayContext } from './suggest-plans';
+import { ADDED_HOLIDAY, PlanView, SuggestInput, holidayContext } from './suggest-plans';
 
 /**
  * vacation: a vacation day the worker would otherwise work.
@@ -46,11 +46,13 @@ export function planCalendar(input: SuggestInput, plan: PlanView): CalendarMonth
   const first = blocks[0].offStart;
   const last = blocks[blocks.length - 1].offEnd;
   const removed = input.removedHolidays.map(parse);
+  const added = input.addedHolidays.map(parse);
   const leave = input.leaveDays.map(parse);
-  const { defaults, daysOff } = holidayContext(input, first, last, removed, leave);
+  const { defaults, daysOff } = holidayContext(input, first, last, removed, added, leave);
   const names = new Map(
     defaults.filter((h) => !removed.includes(h.date)).map((h) => [h.date, h.name]),
   );
+  for (const day of added) if (!names.has(day)) names.set(day, ADDED_HOLIDAY);
   for (const day of leave) names.set(day, LEAVE_DAY);
 
   // Blocks joined by credit overlap on the days off between them; a period's own days win.

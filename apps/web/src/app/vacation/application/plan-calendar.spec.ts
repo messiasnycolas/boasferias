@@ -35,6 +35,7 @@ describe('defaultInput', () => {
       state: null,
       city: null,
       removedHolidays: [],
+      addedHolidays: [],
       leaveDays: [],
       creditDays: 0,
       creditInRow: false,
@@ -99,5 +100,16 @@ describe('planCalendar', () => {
     const pj: SuggestInput = { ...defaultInput('pj', '2027-01-10'), leaveDays: ['2027-08-11'] };
     const view = plan('2027-08-09', '2027-08-13', '2027-08-07', '2027-08-15');
     expect(kinds(pj, view, 8)?.includes('10v 11o 12v')).toBe(true);
+  });
+
+  it('names an added holiday "Feriado adicionado" and a leave day "Dia já marcado"', () => {
+    const input = { ...clt, addedHolidays: ['2027-02-10'], leaveDays: ['2027-02-11'] };
+    const view = plan('2027-02-08', '2027-02-12', '2027-02-06', '2027-02-14');
+    const days = planCalendar(input, view)[0].days;
+    const name = (iso: string) => days.find((d) => d?.iso === iso)?.holiday;
+    expect([name('2027-02-10'), name('2027-02-11')]).toEqual([
+      'Feriado adicionado',
+      'Dia já marcado',
+    ]);
   });
 });

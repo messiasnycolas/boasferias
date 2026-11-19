@@ -81,7 +81,7 @@ const states: [string, (page: Page) => Promise<void>][] = [
       await page.getByRole('button', { name: 'Mais um dia de banco de horas' }).click();
       await page.getByLabel('Primeiro dia').fill('09/02/2027');
       await page.getByLabel('Último dia (opcional)').fill('12/02/2027');
-      await page.getByRole('button', { name: 'Adicionar' }).click();
+      await page.getByRole('button', { name: 'Adicionar', exact: true }).click();
       await page.getByRole('button', { name: 'Ver melhores datas' }).click();
       await expect(page.locator('.legend')).toContainText('Banco de horas');
     },

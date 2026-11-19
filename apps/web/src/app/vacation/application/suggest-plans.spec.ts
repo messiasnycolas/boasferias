@@ -11,6 +11,7 @@ const base: SuggestInput = {
   state: null,
   city: null,
   removedHolidays: [],
+  addedHolidays: [],
   leaveDays: ['2027-08-13'],
   creditDays: 0,
   creditInRow: false,
@@ -54,15 +55,19 @@ describe('suggestPlans', () => {
     const sp = run({ ...window, state: 'SP' });
     if (!none.ok || !sp.ok) throw new Error('unexpected error');
     expect(none.holidays).toEqual([]);
-    expect(sp.holidays).toEqual([{ date: '2027-07-09', name: 'Revolução Constitucionalista' }]);
+    expect(sp.holidays).toEqual([
+      { date: '2027-07-09', name: 'Revolução Constitucionalista', added: false },
+    ]);
   });
 
   it("adds the chosen city's holidays", () => {
     const window = { earliestStart: '2027-01-04', deadline: '2027-01-31', leaveDays: [] };
-    const city = [{ month: 1, day: 25, name: 'Aniversário da Cidade' }];
+    const city = [{ month: 1, day: 25, name: 'Aniversário da Cidade', added: false }];
     const result = run({ ...window, state: 'SP', city });
     if (!result.ok) throw new Error(result.error);
-    expect(result.holidays).toEqual([{ date: '2027-01-25', name: 'Aniversário da Cidade' }]);
+    expect(result.holidays).toEqual([
+      { date: '2027-01-25', name: 'Aniversário da Cidade', added: false },
+    ]);
   });
 
   it('ignores removed holidays and counts extra days off', () => {
@@ -100,10 +105,41 @@ describe('suggestPlans', () => {
     expect(inRow.plans[0].periods.filter((p) => p.credit).map((p) => p.daysSpent)).toEqual([2]);
   });
 
+  it('lists an added holiday once, by date, and not when it is already a default', () => {
+    const result = run({ addedHolidays: ['2027-08-20', '2027-08-20', '2027-09-07', '2027-12-25'] });
+    if (!result.ok) throw new Error(result.error);
+    // Sept 7 is a default holiday outside the window; Dec 25 is outside it too.
+    expect(result.holidays).toEqual([
+      { date: '2027-08-20', name: 'Feriado adicionado', added: true },
+    ]);
+    const window = run({
+      earliestStart: '2027-09-01',
+      deadline: '2027-09-30',
+      addedHolidays: ['2027-09-07'],
+    });
+    if (!window.ok) throw new Error(window.error);
+    expect(window.holidays.map((h) => h.added)).toEqual([false]);
+  });
+
+  it('an added holiday blocks CLT starts in the 2 days before it', () => {
+    const tight = { earliestStart: '2027-08-02', deadline: '2027-08-20', leaveDays: [], limit: 20 };
+    const starts = (change: Partial<SuggestInput>) => {
+      const result = run({ ...tight, ...change });
+      if (!result.ok) throw new Error(result.error);
+      return new Set(result.plans.flatMap((p) => p.periods.map((q) => q.start)));
+    };
+    // Mon Aug 9 and Tue Aug 10 precede the Wednesday holiday.
+    const without = starts({});
+    const added = starts({ addedHolidays: ['2027-08-11'] });
+    expect(without.has('2027-08-09') || without.has('2027-08-10')).toBe(true);
+    expect(added.has('2027-08-09') || added.has('2027-08-10')).toBe(false);
+  });
+
   it('rejects invalid input', () => {
     const cases: [Partial<SuggestInput>, string][] = [
       [{ earliestStart: '2027-02-30' }, 'invalid-date'],
       [{ leaveDays: ['x'] }, 'invalid-date'],
+      [{ addedHolidays: ['x'] }, 'invalid-date'],
       [{ deadline: '2027-08-01' }, 'deadline-before-start'],
       [{ deadline: '2029-01-01' }, 'window-too-long'],
       [{ days: 31 }, 'invalid-days'],

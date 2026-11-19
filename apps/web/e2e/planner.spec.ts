@@ -344,8 +344,23 @@ test.describe('with the plans shown', () => {
     const afterRemoval = await firstPlan(page).innerText();
     await page.getByText('Mais filtros').click();
     await page.getByLabel('Primeiro dia').fill('09/02/2027');
-    await page.getByRole('button', { name: 'Adicionar' }).click();
+    await page.getByRole('button', { name: 'Adicionar', exact: true }).click();
     await expect(firstPlan(page)).not.toHaveText(afterRemoval);
+  });
+
+  test('adds a missing holiday, lists it as added and removes it', async ({ page }) => {
+    await page.getByText('Feriados no período').click();
+    const add = page.getByRole('button', { name: 'Adicionar feriado', exact: true });
+    await expect(add).toBeDisabled();
+    await page.getByLabel('Adicionar feriado', { exact: true }).fill('12/05/2027');
+    await add.click();
+    const item = page.locator('.holidays li', { hasText: 'Feriado adicionado' });
+    await expect(item).toHaveCount(1);
+    await expect(item).toContainText('12 Mai');
+    await expect(page.getByLabel('Adicionar feriado', { exact: true })).toHaveValue('');
+
+    await item.getByRole('button', { name: /^Remover Feriado adicionado de/ }).click();
+    await expect(item).toHaveCount(0);
   });
 
   test('shows an error for invalid input and an empty state for an impossible window', async ({
@@ -382,7 +397,7 @@ test.describe('with the plans shown', () => {
     page,
   }) => {
     await page.getByText('Mais filtros').click();
-    const add = page.getByRole('button', { name: 'Adicionar' });
+    const add = page.getByRole('button', { name: 'Adicionar', exact: true });
     await expect(add).toBeDisabled();
 
     await page.getByLabel('Primeiro dia').fill('12/02/2027');
@@ -410,7 +425,7 @@ test.describe('with the plans shown', () => {
     await page.getByText('Mais filtros').click();
     const group = page.locator('fieldset', { hasText: 'Dias já marcados' });
     await expect(group).toContainText('(0/10)');
-    const add = page.getByRole('button', { name: 'Adicionar' });
+    const add = page.getByRole('button', { name: 'Adicionar', exact: true });
     // Every other day, so each one is its own entry.
     for (let i = 0; i < 10; i++) {
       await page.getByLabel('Primeiro dia').fill(`${String(2 + 2 * i).padStart(2, '0')}/03/2027`);
@@ -571,6 +586,7 @@ test.describe('with the plans shown', () => {
         page,
       }) => {
         await page.getByText('Mais filtros').click();
+        await page.getByText('Feriados no período').click();
         const fields = page.locator('app-date-field');
         for (const field of await fields.all()) {
           const box = (await field.boundingBox())!;

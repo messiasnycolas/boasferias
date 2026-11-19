@@ -42,6 +42,8 @@ export interface SuggestInput {
   /** The city's holidays, once a city in that state is chosen. */
   city: readonly HolidayRule[] | null;
   removedHolidays: readonly string[];
+  /** Holidays the user adds (missing from the defaults): they follow the holiday rules. */
+  addedHolidays: readonly string[];
   /** Days already scheduled off (leave): CLT vacation may touch them, never cover them. */
   leaveDays: readonly string[];
   /** CLT only: credit days (banco de horas) for the planner to place, all of them. */
@@ -86,10 +88,15 @@ export interface PlanView {
 export interface HolidayView {
   date: string;
   name: string;
+  /** Added by the user, not a default. */
+  added: boolean;
 }
 
 export type SuggestResult =
   { ok: true; plans: PlanView[]; holidays: HolidayView[] } | { ok: false; error: SuggestError };
+
+/** Name of a holiday the user added. */
+export const ADDED_HOLIDAY = 'Feriado adicionado';
 
 const isIntIn = (value: number, min: number, max: number) =>
   Number.isInteger(value) && value >= min && value <= max;
@@ -161,6 +168,7 @@ export function holidayContext(
   from: DayNumber,
   to: DayNumber,
   removed: readonly DayNumber[],
+  added: readonly DayNumber[],
   leave: readonly DayNumber[],
 ): { defaults: Holiday[]; daysOff: DaysOff } {
   // One year of margin: blocks of days off may reach past the window.
@@ -170,23 +178,42 @@ export function holidayContext(
   const removedSet = new Set(removed);
   const daysOff = new DaysOff(
     input.workWeek,
-    defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
+    [...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)), ...added],
     leave,
   );
   return { defaults, daysOff };
+}
+
+/** Holidays in the window: defaults plus the added days, once each, by date. */
+function listedHolidays(
+  defaults: readonly Holiday[],
+  added: readonly DayNumber[],
+  from: DayNumber,
+  to: DayNumber,
+): HolidayView[] {
+  const inWindow = (date: DayNumber) => date >= from && date <= to;
+  const known = new Set(defaults.map((h) => h.date));
+  const extra = [...new Set(added)]
+    .filter((date) => inWindow(date) && !known.has(date))
+    .map((date) => ({ date, name: ADDED_HOLIDAY, added: true }));
+  const base = defaults.filter((h) => inWindow(h.date)).map((h) => ({ ...h, added: false }));
+  return [...base, ...extra]
+    .sort((a, b) => a.date - b.date)
+    .map((h) => ({ date: toIsoDate(h.date), name: h.name, added: h.added }));
 }
 
 /** Ranked vacation plans for a CLT or PJ worker, with the default holidays in the window. */
 export function suggestPlans(input: SuggestInput): SuggestResult {
   const [from, to] = [parseIsoDate(input.earliestStart), parseIsoDate(input.deadline)];
   const removed = parseAll(input.removedHolidays);
+  const added = parseAll(input.addedHolidays);
   const leave = parseAll(input.leaveDays);
-  if (from === null || to === null || !removed || !leave)
+  if (from === null || to === null || !removed || !added || !leave)
     return { ok: false, error: 'invalid-date' };
   const error = validate(input, from, to);
   if (error) return { ok: false, error };
 
-  const { defaults, daysOff } = holidayContext(input, from, to, removed, leave);
+  const { defaults, daysOff } = holidayContext(input, from, to, removed, added, leave);
   const clt = input.mode === 'clt';
   const units = clt ? enjoyedDays(input.days, input.sellThird) : input.days;
   const plans = rankPlans({
@@ -212,8 +239,6 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
       creditDays: input.creditDays,
       extraDays: plan.daysOff - plan.daysSpent,
     })),
-    holidays: defaults
-      .filter((h) => h.date >= from && h.date <= to)
-      .map((h) => ({ date: toIsoDate(h.date), name: h.name })),
+    holidays: listedHolidays(defaults, added, from, to),
   };
 }

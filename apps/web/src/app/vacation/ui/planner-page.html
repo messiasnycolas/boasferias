@@ -350,25 +350,57 @@
                 <span
                   ><b>{{ formatDay(h.date) }}</b> {{ h.name }}</span
                 >
-                <button
-                  type="button"
-                  class="toggle-x"
-                  [class.added]="form().removedHolidays.includes(h.date)"
-                  [attr.aria-label]="
-                    (form().removedHolidays.includes(h.date) ? 'Considerar ' : 'Remover ') + h.name
-                  "
-                  (click)="toggleHoliday(h.date)"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 7l10 10M17 7L7 17" />
-                  </svg>
-                </button>
+                @if (h.added) {
+                  <button
+                    type="button"
+                    class="toggle-x"
+                    [attr.aria-label]="'Remover ' + h.name + ' de ' + formatDate(h.date)"
+                    (click)="removeAddedHoliday(h.date)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 7l10 10M17 7L7 17" />
+                    </svg>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="toggle-x"
+                    [class.added]="form().removedHolidays.includes(h.date)"
+                    [attr.aria-label]="
+                      (form().removedHolidays.includes(h.date) ? 'Considerar ' : 'Remover ') +
+                      h.name
+                    "
+                    (click)="toggleHoliday(h.date)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 7l10 10M17 7L7 17" />
+                    </svg>
+                  </button>
+                }
               </li>
             }
           </ul>
         } @else {
           <p class="hint">Os feriados aparecem depois do primeiro cálculo.</p>
         }
+        <div class="dates add-holiday">
+          <div class="field stacked">
+            <label for="holiday-add">Adicionar feriado</label>
+            <app-date-field
+              inputId="holiday-add"
+              [value]="holidayDate()"
+              (valueChange)="holidayDate.set($event)"
+            />
+          </div>
+        </div>
+        <button
+          type="button"
+          class="secondary add-leave"
+          [disabled]="!canAddHoliday()"
+          (click)="addHoliday()"
+        >
+          Adicionar feriado
+        </button>
       </details>
     </div>
 

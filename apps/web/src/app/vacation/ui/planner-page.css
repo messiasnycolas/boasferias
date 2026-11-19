@@ -656,3 +656,7 @@ h3 {
     padding-top: 64px;
   }
 }
+
+.more > .add-holiday {
+  margin-top: 12px;
+}
