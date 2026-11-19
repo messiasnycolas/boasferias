@@ -90,6 +90,11 @@ export class PlannerPage {
     return leave && !leave.ok ? LEAVE_MESSAGES[leave.error] : null;
   });
   protected readonly leaveRuns = computed(() => groupLeave(this.form().leaveDays));
+  /** At the cap, a day that extends or joins entries still fits. */
+  protected readonly canAddLeave = computed(() => {
+    const days = this.leaveDays();
+    return !!days && groupLeave([...this.form().leaveDays, ...days]).length <= MAX_LEAVE_RUNS;
+  });
   protected readonly maxLeaveRuns = MAX_LEAVE_RUNS;
   protected readonly creditMax = CREDIT_MAX_DAYS;
 
@@ -236,7 +241,7 @@ export class PlannerPage {
 
   protected addLeave(): void {
     const days = this.leaveDays();
-    if (!days || this.leaveRuns().length >= MAX_LEAVE_RUNS) return;
+    if (!days || !this.canAddLeave()) return;
     const all = new Set([...this.form().leaveDays, ...days]);
     this.patch({ leaveDays: [...all].sort() });
     this.leaveStart.set('');

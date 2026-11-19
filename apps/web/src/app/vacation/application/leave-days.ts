@@ -3,7 +3,7 @@ import { addDays, parseIsoDate, toIsoDate } from '../../calendar/domain/calendar
 /** Longest range added at once: big enough for any leave, small enough to catch a wrong year. */
 export const MAX_LEAVE_DAYS = 60;
 
-/** Entries in the list (a day or a range each): keeps the form short and the plan search fast. */
+/** Entries in the list (a day or a range each): keeps the form short. */
 export const MAX_LEAVE_RUNS = 10;
 
 export type LeaveError = 'invalid-date' | 'end-before-start' | 'too-long';

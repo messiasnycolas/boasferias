@@ -80,9 +80,9 @@ function insert(slots: Slots, state: number, entry: Entry, capacity: number): bo
  */
 export function rankPlans(search: PlanSearch): Plan[] {
   const { units, maxPeriods, splitNeedsLong, candidates, limit } = search;
+  if (candidates.length === 0) return [];
   const creditUnits = search.credit?.units ?? 0;
   const all = [...candidates, ...(search.credit?.candidates ?? [])];
-  if (all.length === 0) return [];
 
   const counts = maxPeriods + 1;
   const credits = creditUnits + 1;

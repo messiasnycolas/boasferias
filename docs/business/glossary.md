@@ -7,11 +7,12 @@
 | Bloco de descanso                | block (`offStart`..`offEnd`)   | A period plus the non-work days touching it                                                                   |
 | Dias de descanso                 | days off (`daysOff`)           | Total days in blocks; the ranking score. The page never says "folga"                                          |
 | Dias a mais ("+14 dias")         | extra days (`extraDays`)       | Days off minus days spent. Shown as "+N dias"; the page never says "extra" or "folga"                       |
-| Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ: workdays                                                                |
+| Dias gastos                      | days spent (`cost`)            | CLT: calendar days of the period; PJ and credit: workdays. A plan's days spent include its credit            |
 | Feriado                          | holiday                        | Default list in `calendar`; the user can remove or add days                                                   |
 | Estado                           | state (`Uf`)                   | Where the user works; adds the state's holidays ([holidays.md](holidays.md)). Optional, remembered on the device |
 | Cidade                           | city (`city`)                  | A city of the chosen state; adds its holidays and decides Corpus Christi ([holidays.md](holidays.md)). Optional, remembered on the device |
-| Licença ou banco de horas        | extra day off (`extraDaysOff`) | Days the user already has free (leave, time bank), added as a first day plus an optional last day (up to 60 days at once) and listed as one range. Holidays of the chosen city are added on their own |
+| Dias já marcados                 | leave (`leaveDays`)            | Days the user already has off (licença, dispensa, agreed days), added as a first day plus an optional last day (up to 60 days at once), 10 entries at most. CLT vacation may touch them, never cover them; inside a PJ period they are free. Holidays of the chosen city are added on their own |
+| Saldo para encaixar / banco de horas | credit (`creditDays`, `creditInRow`) | CLT only: 0 to 15 workdays the planner places with the vacation, all of them; "Tirar todos seguidos" keeps them in one run. Shown as "Banco de horas" in the plan |
 | Ponte / emenda                   | bridge                         | Taking workdays between days off to join them                                                                 |
 | Repouso semanal remunerado (DSR) | rest day                       | Weekly paid rest, Sunday by default                                                                           |
 | Período concessivo               | concession period / deadline   | 12 months in which the employer must grant the vacation                                                       |
@@ -21,4 +22,4 @@
 | CLT / PJ                         | mode                           | Employee under the CLT / contractor                                                                           |
 | Plano A, B … T                   | plan (`limit`)                 | A ranked combination of periods, named by letter. 3 by default; "Calcular mais" adds 5 at a time, up to 20    |
 | Empatado                         | tie                            | Plans with the same days of rest; each tied plan names the others                                             |
-| Compartilhar                     | share image                    | A 1080x1350 JPEG of one plan: "VOU CURTIR N DIAS DE DESCANSO, partindo de X dias de férias" (PJ: "dias úteis") and the address. Phones get the share sheet with the image only; desktops download it |
+| Compartilhar                     | share image                    | A 1080x1350 JPEG of one plan: "VOU CURTIR N DIAS DE DESCANSO, partindo de X dias de férias" (with credit: "… e Y de banco de horas"; PJ: "dias úteis") and the address. Phones get the share sheet with the image only; desktops download it |

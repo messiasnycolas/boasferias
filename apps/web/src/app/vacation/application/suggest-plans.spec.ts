@@ -88,7 +88,13 @@ describe('suggestPlans', () => {
       expect(credit.reduce((sum, p) => sum + p.daysSpent, 0)).toBe(2);
       expect([plan.daysSpent, plan.creditDays]).toEqual([13, 2]);
       expect(plan.extraDays).toBe(plan.daysOff - 13);
+      // Back-to-back credit days are one row.
+      for (let i = 1; i < credit.length; i++)
+        expect(credit[i].start > credit[i - 1].offEnd).toBe(true);
     }
+    const run5 = run({ creditDays: 5, deadline: '2027-08-20' });
+    if (!run5.ok) throw new Error(run5.error);
+    expect(run5.plans.some((p) => p.periods.some((q) => q.credit && q.daysSpent > 1))).toBe(true);
     const inRow = run({ creditDays: 2, creditInRow: true });
     if (!inRow.ok) throw new Error(inRow.error);
     expect(inRow.plans[0].periods.filter((p) => p.credit).map((p) => p.daysSpent)).toEqual([2]);

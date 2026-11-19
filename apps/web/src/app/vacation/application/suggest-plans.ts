@@ -42,7 +42,7 @@ export interface SuggestInput {
   /** The city's holidays, once a city in that state is chosen. */
   city: readonly HolidayRule[] | null;
   removedHolidays: readonly string[];
-  /** Days already scheduled off (leave): vacation may touch them, never cover them. */
+  /** Days already scheduled off (leave): CLT vacation may touch them, never cover them. */
   leaveDays: readonly string[];
   /** CLT only: credit days (banco de horas) for the planner to place, all of them. */
   creditDays: number;
@@ -136,6 +136,25 @@ function toPeriodView(c: Period): PeriodView {
   };
 }
 
+/** Credit days placed back to back are one run to the user: one row, one range. */
+function joinCredit(periods: readonly Period[]): Period[] {
+  const joined: Period[] = [];
+  for (const p of periods) {
+    const last = joined.at(-1);
+    if (last?.credit && p.credit && p.start === last.offEnd + 1) {
+      joined[joined.length - 1] = {
+        ...last,
+        end: p.end,
+        offEnd: p.offEnd,
+        cost: last.cost + p.cost,
+      };
+    } else {
+      joined.push(p);
+    }
+  }
+  return joined;
+}
+
 /** Default holidays around [from, to] and the resulting work calendar, after the user's changes. */
 export function holidayContext(
   input: Pick<SuggestInput, 'workWeek' | 'state' | 'city'>,
@@ -187,7 +206,7 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
   return {
     ok: true,
     plans: plans.map((plan) => ({
-      periods: plan.periods.map(toPeriodView),
+      periods: joinCredit(plan.periods).map(toPeriodView),
       daysOff: plan.daysOff,
       daysSpent: plan.daysSpent,
       creditDays: input.creditDays,

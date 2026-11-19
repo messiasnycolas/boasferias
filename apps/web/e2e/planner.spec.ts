@@ -420,6 +420,8 @@ test.describe('with the plans shown', () => {
     await expect(group.getByText('10 de 10 entradas')).toBeAttached();
     await page.getByLabel('Primeiro dia').fill('25/04/2027');
     await expect(add).toBeDisabled();
+    await page.getByLabel('Primeiro dia').fill('03/03/2027'); // joins two entries
+    await expect(add).toBeEnabled();
     await group
       .getByRole('button', { name: /^Remover/ })
       .first()

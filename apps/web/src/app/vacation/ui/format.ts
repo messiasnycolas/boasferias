@@ -1,3 +1,4 @@
+import { CREDIT_MAX_DAYS } from '../domain/credit';
 import { Mode, SuggestError } from '../application/suggest-plans';
 
 const TIME_ZONE = 'America/Sao_Paulo';
@@ -103,5 +104,5 @@ export const ERROR_MESSAGES: Record<SuggestError, string> = {
   'invalid-limit': 'Não foi possível calcular. Recarregue a página.',
   'invalid-state': 'Não foi possível calcular. Recarregue a página.',
   'invalid-city': 'Não foi possível calcular. Recarregue a página.',
-  'invalid-credit': 'Não foi possível calcular. Recarregue a página.',
+  'invalid-credit': `Use de 0 a ${CREDIT_MAX_DAYS} dias de banco de horas.`,
 };

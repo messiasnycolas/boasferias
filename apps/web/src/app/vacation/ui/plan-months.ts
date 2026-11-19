@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CalendarDay, CalendarMonth } from '../application/plan-calendar';
 import { formatDate, monthName } from './format';
 
@@ -24,10 +24,10 @@ const FIT_CREDIT = 10.3;
       <ul class="legend" aria-label="Legenda" [style.--fit.em]="fit()">
         <li><i class="swatch vacation"></i>Férias</li>
         <li><i class="swatch off"></i>Descanso</li>
-        @if (hasKind('counted')) {
+        @if (hasCounted()) {
           <li><i class="swatch counted"></i>Contado como férias pela CLT</li>
         }
-        @if (hasKind('credit')) {
+        @if (hasCredit()) {
           <li><i class="swatch credit"></i>Banco de horas</li>
         }
         <li><b class="holiday-mark">12</b>Feriado ou dia já marcado</li>
@@ -72,18 +72,15 @@ export class PlanMonths {
   protected readonly weekdays = WEEKDAYS;
   protected readonly name = (m: CalendarMonth) => monthName(m.year, m.month);
 
-  protected hasKind(kind: CalendarDay['kind']): boolean {
-    return this.months().some((m) => m.days.some((d) => d?.kind === kind));
-  }
-
+  private readonly kinds = computed(
+    () => new Set(this.months().flatMap((m) => m.days.map((d) => d?.kind))),
+  );
+  protected readonly hasCounted = computed(() => this.kinds().has('counted'));
+  protected readonly hasCredit = computed(() => this.kinds().has('credit'));
   /** Width in em of the legend on one row; wider items make the row break to a column sooner. */
-  protected fit(): number {
-    return (
-      FIT_BASE +
-      (this.hasKind('counted') ? FIT_COUNTED : 0) +
-      (this.hasKind('credit') ? FIT_CREDIT : 0)
-    );
-  }
+  protected readonly fit = computed(
+    () => FIT_BASE + (this.hasCounted() ? FIT_COUNTED : 0) + (this.hasCredit() ? FIT_CREDIT : 0),
+  );
 
   protected label(day: CalendarDay): string {
     const parts = [formatDate(day.iso), KIND_LABEL[day.kind], day.holiday ?? ''];

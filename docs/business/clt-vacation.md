@@ -27,14 +27,15 @@ Days are calendar days: weekends and holidays inside a period count as vacation.
 ## Product decisions
 
 - Target users: Rio, São Paulo, Belo Horizonte, Recife, Porto Alegre, Curitiba, Florianópolis.
-- Default holidays: national + Good Friday + Corpus Christi, plus the state's once one is chosen ("Estado") and the city's once one is chosen ("Cidade", which also decides Corpus Christi); both remembered on the device. Users can remove any and add days they already have free ("Licença ou banco de horas").
-- Added days off also block CLT starts in the 2 days before them (legally safe).
+- Default holidays: national + Good Friday + Corpus Christi, plus the state's once one is chosen ("Estado") and the city's once one is chosen ("Cidade", which also decides Corpus Christi); both remembered on the device. Users can remove any.
+- Days already scheduled ("Dias já marcados": licença paternidade or maternidade, dispensa por luto, days off agreed with the company): 1 to 10 entries, a day or a range each. They are leave, not holidays: CLT vacation may touch them on either side but never cover them (inside a PJ period they are free, like holidays), they join the block of days off, and they do not block CLT starts (art. 134 §3 names only holidays and the weekly rest).
+- Banco de horas to place ("Saldo para encaixar", CLT only): 0 to 15 days, all spent. Workdays only. Free by default (the planner may split them, e.g. bridges next to holidays) or "Tirar todos seguidos" (one run). Credit may touch a vacation period, leave, a holiday or other credit (back-to-back credit days show as one row); two vacation periods still never touch. Placed together with the vacation, so a long leave next to a vacation can make a block of 150+ days.
 - Work week: Mon-Fri, Mon-Sat or custom. Weekly rest is Sunday; if Sunday is worked, every non-work day counts as rest for the start rule.
 - CLT spends calendar days; PJ spends workdays only (holidays and weekends inside a PJ period are free).
 - Default start: CLT today + 30 (notice); PJ today + 7 (no legal notice, but a week to arrange the work).
 - Dates are shown and typed as dd/mm/aaaa on every phone (the native picker follows the phone's language, so the page uses its own field).
 - Periods: "up to N". CLT up to 3; PJ up to 10, because unlimited splits always degrade into single days next to weekends.
-- Score: total consecutive days off (vacation plus the non-work days touching it). Extra days = score minus days spent. Ties: earliest start. Plans with the same days off are shown once.
+- Score: total consecutive days off (vacation and credit plus the non-work days touching them). Extra days = score minus days spent (vacation plus credit). Ties: earliest start. Plans with the same days off are shown once.
 - A CLT plan often has to spend a weekend day at a period edge: with a Mon-Fri week and no holiday nearby, a waste-free period runs Monday to Friday (5, 12, 19, 26 days), and those cannot add up to 30. The UI shows these days as counted by the CLT.
 
 ## Later

@@ -260,7 +260,7 @@
           <button
             type="button"
             class="secondary add-leave"
-            [disabled]="!leaveDays() || leaveRuns().length >= maxLeaveRuns"
+            [disabled]="!canAddLeave()"
             (click)="addLeave()"
           >
             Adicionar
@@ -442,11 +442,7 @@
                 @for (period of plan.periods; track period.start) {
                   <li>
                     @if (period.credit) {
-                      <b>{{
-                        period.start === period.end
-                          ? formatDay(period.start)
-                          : formatRange(period.start, period.end)
-                      }}</b>
+                      <b>{{ formatRange(period.start, period.end) }}</b>
                       <span>
                         {{ period.daysSpent }}
                         {{ period.daysSpent === 1 ? 'dia' : 'dias' }} de banco de horas
