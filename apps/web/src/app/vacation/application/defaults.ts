@@ -36,7 +36,9 @@ export function defaultInput(mode: Mode, today: string): SuggestInput {
     state: null,
     city: null,
     removedHolidays: [],
-    extraDaysOff: [],
+    leaveDays: [],
+    creditDays: 0,
+    creditInRow: false,
     limit: DEFAULT_LIMIT,
   };
 }

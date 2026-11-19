@@ -6,6 +6,7 @@ const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   vacation: 'férias',
   counted: 'férias contadas pela CLT',
+  credit: 'banco de horas',
   off: 'descanso',
   none: '',
 };

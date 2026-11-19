@@ -98,4 +98,5 @@ export const ERROR_MESSAGES: Record<SuggestError, string> = {
   'invalid-limit': 'Não foi possível calcular. Recarregue a página.',
   'invalid-state': 'Não foi possível calcular. Recarregue a página.',
   'invalid-city': 'Não foi possível calcular. Recarregue a página.',
+  'invalid-credit': 'Não foi possível calcular. Recarregue a página.',
 };

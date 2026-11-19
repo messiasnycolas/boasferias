@@ -4,13 +4,14 @@ import { PlanView, SuggestInput, suggestPlans } from './suggest-plans';
 
 const clt: SuggestInput = {
   ...defaultInput('clt', '2027-01-10'),
-  extraDaysOff: ['2027-02-08', '2027-02-09'],
+  leaveDays: ['2027-02-08', '2027-02-09'],
 };
 
 const plan = (start: string, end: string, offStart: string, offEnd: string): PlanView => ({
-  periods: [{ start, end, daysSpent: 0, offStart, offEnd, daysOff: 0 }],
+  periods: [{ start, end, daysSpent: 0, offStart, offEnd, daysOff: 0, credit: false }],
   daysOff: 0,
   daysSpent: 0,
+  creditDays: 0,
   extraDays: 0,
 });
 
@@ -34,7 +35,9 @@ describe('defaultInput', () => {
       state: null,
       city: null,
       removedHolidays: [],
-      extraDaysOff: [],
+      leaveDays: [],
+      creditDays: 0,
+      creditInRow: false,
       limit: 3,
     });
   });
@@ -57,7 +60,7 @@ describe('planCalendar', () => {
     expect(months.map((m) => `${m.year}-${m.month}`)).toEqual(['2027-1', '2027-2']);
     expect(months[1].days[0]).toBeNull(); // February 2027 starts on a Monday
     expect(kinds(clt, view, 2)?.startsWith('1v 2v 3v 4v 5v 6o 7o 8o 9o 10n')).toBe(true);
-    expect(months[1].days.find((d) => d?.day === 8)?.holiday).toBe('Licença ou banco de horas');
+    expect(months[1].days.find((d) => d?.day === 8)?.holiday).toBe('Dia já marcado');
   });
 
   it('flags days the CLT counts as vacation even though they are off', () => {
@@ -79,8 +82,21 @@ describe('planCalendar', () => {
     expect(planCalendar(clt, view).map((m) => m.month)).toEqual([1, 2, 5]);
   });
 
+  it('marks credit days apart from vacation', () => {
+    const input: SuggestInput = { ...clt, creditDays: 1, deadline: '2027-03-31' };
+    const result = suggestPlans(input);
+    if (!result.ok) throw new Error(result.error);
+    const view = result.plans[0];
+    const credit = view.periods.find((p) => p.credit);
+    if (!credit) throw new Error('no credit day placed');
+    const day = planCalendar(input, view)
+      .flatMap((m) => m.days)
+      .find((d) => d?.iso === credit.start);
+    expect(day?.kind).toBe('credit');
+  });
+
   it('keeps PJ holidays inside a period free', () => {
-    const pj: SuggestInput = { ...defaultInput('pj', '2027-01-10'), extraDaysOff: ['2027-08-11'] };
+    const pj: SuggestInput = { ...defaultInput('pj', '2027-01-10'), leaveDays: ['2027-08-11'] };
     const view = plan('2027-08-09', '2027-08-13', '2027-08-07', '2027-08-15');
     expect(kinds(pj, view, 8)?.includes('10v 11o 12v')).toBe(true);
   });

@@ -10,9 +10,10 @@ import { PlanView, SuggestInput, holidayContext } from './suggest-plans';
 /**
  * vacation: a vacation day the worker would otherwise work.
  * counted: a weekend or holiday inside a CLT period, spent as vacation by law.
- * off: a day off in the block (around the period, or free inside a PJ period).
+ * credit: a credit day (banco de horas) the worker would otherwise work.
+ * off: a day off in the block (around the period, or free inside a PJ period or a credit run).
  */
-export type DayKind = 'vacation' | 'counted' | 'off' | 'none';
+export type DayKind = 'vacation' | 'counted' | 'credit' | 'off' | 'none';
 
 export interface CalendarDay {
   iso: string;
@@ -30,12 +31,13 @@ export interface CalendarMonth {
   days: (CalendarDay | null)[];
 }
 
-const EXTRA_DAY_OFF = 'Licença ou banco de horas';
+const LEAVE_DAY = 'Dia já marcado';
 
 /** Month grids for the months that hold days off in `plan`; empty months between periods are skipped. */
 export function planCalendar(input: SuggestInput, plan: PlanView): CalendarMonth[] {
   const parse = (iso: string) => parseIsoDate(iso) as DayNumber;
   const blocks = plan.periods.map((p) => ({
+    credit: p.credit,
     start: parse(p.start),
     end: parse(p.end),
     offStart: parse(p.offStart),
@@ -44,19 +46,21 @@ export function planCalendar(input: SuggestInput, plan: PlanView): CalendarMonth
   const first = blocks[0].offStart;
   const last = blocks[blocks.length - 1].offEnd;
   const removed = input.removedHolidays.map(parse);
-  const extra = input.extraDaysOff.map(parse);
-  const { defaults, daysOff } = holidayContext(input, first, last, removed, extra);
+  const leave = input.leaveDays.map(parse);
+  const { defaults, daysOff } = holidayContext(input, first, last, removed, leave);
   const names = new Map(
     defaults.filter((h) => !removed.includes(h.date)).map((h) => [h.date, h.name]),
   );
-  for (const day of extra) names.set(day, EXTRA_DAY_OFF);
+  for (const day of leave) names.set(day, LEAVE_DAY);
 
+  // Blocks joined by credit overlap on the days off between them; a period's own days win.
   const kindOf = (day: DayNumber): DayKind => {
-    const block = blocks.find((b) => day >= b.offStart && day <= b.offEnd);
-    if (!block) return 'none';
-    if (day < block.start || day > block.end) return 'off';
-    if (daysOff.isWorkday(day)) return 'vacation';
-    return input.mode === 'clt' ? 'counted' : 'off';
+    const inBlock = blocks.filter((b) => day >= b.offStart && day <= b.offEnd);
+    if (!inBlock.length) return 'none';
+    const block = inBlock.find((b) => day >= b.start && day <= b.end);
+    if (!block) return 'off';
+    if (daysOff.isWorkday(day)) return block.credit ? 'credit' : 'vacation';
+    return input.mode === 'clt' && !block.credit ? 'counted' : 'off';
   };
 
   const months: CalendarMonth[] = [];

@@ -8,6 +8,7 @@ import {
   cltCandidates,
   enjoyedDays,
 } from '../domain/clt';
+import { CREDIT_MAX_DAYS, creditCandidates } from '../domain/credit';
 import { DaysOff } from '../domain/days-off';
 import { PJ_MAX_DAYS, PJ_MAX_PERIODS, pjCandidates } from '../domain/pj';
 import { Period, rankPlans } from '../domain/planner';
@@ -41,7 +42,12 @@ export interface SuggestInput {
   /** The city's holidays, once a city in that state is chosen. */
   city: readonly HolidayRule[] | null;
   removedHolidays: readonly string[];
-  extraDaysOff: readonly string[];
+  /** Days already scheduled off (leave): vacation may touch them, never cover them. */
+  leaveDays: readonly string[];
+  /** CLT only: credit days (banco de horas) for the planner to place, all of them. */
+  creditDays: number;
+  /** Credit days in one run instead of wherever they rest most. */
+  creditInRow: boolean;
   limit: number;
 }
 
@@ -54,7 +60,8 @@ export type SuggestError =
   | 'invalid-work-week'
   | 'invalid-limit'
   | 'invalid-state'
-  | 'invalid-city';
+  | 'invalid-city'
+  | 'invalid-credit';
 
 export interface PeriodView {
   start: string;
@@ -63,12 +70,16 @@ export interface PeriodView {
   offStart: string;
   offEnd: string;
   daysOff: number;
+  /** Credit days (banco de horas), not vacation. */
+  credit: boolean;
 }
 
 export interface PlanView {
   periods: PeriodView[];
   daysOff: number;
+  /** Vacation and credit days together. */
   daysSpent: number;
+  creditDays: number;
   extraDays: number;
 }
 
@@ -109,6 +120,7 @@ function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestE
   if (input.state !== null && !STATES.includes(input.state)) return 'invalid-state';
   if (input.city !== null && (input.state === null || !input.city.every(validRule)))
     return 'invalid-city';
+  if (!isIntIn(input.creditDays, 0, clt ? CREDIT_MAX_DAYS : 0)) return 'invalid-credit';
   return null;
 }
 
@@ -120,6 +132,7 @@ function toPeriodView(c: Period): PeriodView {
     offStart: toIsoDate(c.offStart),
     offEnd: toIsoDate(c.offEnd),
     daysOff: c.offEnd - c.offStart + 1,
+    credit: !!c.credit,
   };
 }
 
@@ -129,17 +142,18 @@ export function holidayContext(
   from: DayNumber,
   to: DayNumber,
   removed: readonly DayNumber[],
-  extra: readonly DayNumber[],
+  leave: readonly DayNumber[],
 ): { defaults: Holiday[]; daysOff: DaysOff } {
   // One year of margin: blocks of days off may reach past the window.
   const defaults: Holiday[] = [];
   for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
     defaults.push(...holidays(year, input.state ?? undefined, input.city ?? undefined));
   const removedSet = new Set(removed);
-  const daysOff = new DaysOff(input.workWeek, [
-    ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
-    ...extra,
-  ]);
+  const daysOff = new DaysOff(
+    input.workWeek,
+    defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
+    leave,
+  );
   return { defaults, daysOff };
 }
 
@@ -147,13 +161,13 @@ export function holidayContext(
 export function suggestPlans(input: SuggestInput): SuggestResult {
   const [from, to] = [parseIsoDate(input.earliestStart), parseIsoDate(input.deadline)];
   const removed = parseAll(input.removedHolidays);
-  const extra = parseAll(input.extraDaysOff);
-  if (from === null || to === null || !removed || !extra)
+  const leave = parseAll(input.leaveDays);
+  if (from === null || to === null || !removed || !leave)
     return { ok: false, error: 'invalid-date' };
   const error = validate(input, from, to);
   if (error) return { ok: false, error };
 
-  const { defaults, daysOff } = holidayContext(input, from, to, removed, extra);
+  const { defaults, daysOff } = holidayContext(input, from, to, removed, leave);
   const clt = input.mode === 'clt';
   const units = clt ? enjoyedDays(input.days, input.sellThird) : input.days;
   const plans = rankPlans({
@@ -164,6 +178,10 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
       ? cltCandidates(daysOff, from, to, units, input.maxPeriods)
       : pjCandidates(daysOff, from, to, units),
     limit: input.limit,
+    credit: {
+      units: input.creditDays,
+      candidates: creditCandidates(daysOff, from, to, input.creditDays, input.creditInRow),
+    },
   });
 
   return {
@@ -172,6 +190,7 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
       periods: plan.periods.map(toPeriodView),
       daysOff: plan.daysOff,
       daysSpent: plan.daysSpent,
+      creditDays: input.creditDays,
       extraDays: plan.daysOff - plan.daysSpent,
     })),
     holidays: defaults

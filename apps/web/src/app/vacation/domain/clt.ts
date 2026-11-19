@@ -30,7 +30,10 @@ export function canStartClt(day: DayNumber, daysOff: DaysOff): boolean {
   return true;
 }
 
-/** Every allowed CLT period inside [from, to]; days are calendar days, so non-work days inside are spent. */
+/**
+ * Every allowed CLT period inside [from, to]; days are calendar days, so non-work days inside are
+ * spent. No period covers a day of leave: vacation may only touch it.
+ */
 export function cltCandidates(
   daysOff: DaysOff,
   from: DayNumber,
@@ -42,9 +45,11 @@ export function cltCandidates(
   const candidates: Period[] = [];
   for (let start = from; start <= to; start++) {
     if (!canStartClt(start, daysOff)) continue;
+    let leave = start; // first day of leave from start on, within reach
+    while (leave < start + days && !daysOff.isLeave(leave)) leave++;
     for (let length = minLength; length <= days; length++) {
       const end = addDays(start, length - 1);
-      if (end > to) break;
+      if (end > to || end >= leave) break;
       candidates.push({
         start,
         end,

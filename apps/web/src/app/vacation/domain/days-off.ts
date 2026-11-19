@@ -4,22 +4,35 @@ const SUNDAY = 0;
 export const MON_FRI: readonly number[] = [1, 2, 3, 4, 5];
 export const MON_SAT: readonly number[] = [1, 2, 3, 4, 5, 6];
 
-/** Which days someone works, given their work week (0 = Sunday) and the holidays they get off. */
+/**
+ * Which days someone works, given their work week (0 = Sunday), the holidays they get off and the
+ * days of leave already scheduled (licença, luto): off, but not holidays, and no vacation over them.
+ */
 export class DaysOff {
   private readonly workdays: ReadonlySet<number>;
   private readonly holidays: ReadonlySet<DayNumber>;
+  private readonly leave: ReadonlySet<DayNumber>;
 
-  constructor(workWeek: readonly number[], holidays: Iterable<DayNumber>) {
+  constructor(
+    workWeek: readonly number[],
+    holidays: Iterable<DayNumber>,
+    leave: Iterable<DayNumber> = [],
+  ) {
     this.workdays = new Set(workWeek);
     this.holidays = new Set(holidays);
+    this.leave = new Set(leave);
   }
 
   isWorkday(day: DayNumber): boolean {
-    return this.workdays.has(weekday(day)) && !this.holidays.has(day);
+    return this.workdays.has(weekday(day)) && !this.holidays.has(day) && !this.leave.has(day);
   }
 
   isHoliday(day: DayNumber): boolean {
     return this.holidays.has(day);
+  }
+
+  isLeave(day: DayNumber): boolean {
+    return this.leave.has(day);
   }
 
   /** Weekly paid rest: Sunday, or every non-work weekday when Sundays are worked. */

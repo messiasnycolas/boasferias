@@ -87,7 +87,7 @@ export class PlannerPage {
     const leave = this.leave();
     return leave && !leave.ok ? LEAVE_MESSAGES[leave.error] : null;
   });
-  protected readonly leaveRuns = computed(() => groupLeave(this.form().extraDaysOff));
+  protected readonly leaveRuns = computed(() => groupLeave(this.form().leaveDays));
 
   protected readonly weekChips = WEEKDAY_CHIPS;
   protected readonly weekNames = WEEKDAY_NAMES;
@@ -177,14 +177,14 @@ export class PlannerPage {
 
   protected setMode(mode: Mode): void {
     if (mode === this.form().mode) return;
-    const { workWeek, state, city, removedHolidays, extraDaysOff } = this.form();
+    const { workWeek, state, city, removedHolidays, leaveDays } = this.form();
     this.form.set({
       ...defaultInput(mode, todayIso()),
       workWeek,
       state,
       city,
       removedHolidays,
-      extraDaysOff,
+      leaveDays,
     });
   }
 
@@ -228,14 +228,14 @@ export class PlannerPage {
   protected addLeave(): void {
     const days = this.leaveDays();
     if (!days) return;
-    const all = new Set([...this.form().extraDaysOff, ...days]);
-    this.patch({ extraDaysOff: [...all].sort() });
+    const all = new Set([...this.form().leaveDays, ...days]);
+    this.patch({ leaveDays: [...all].sort() });
     this.leaveStart.set('');
     this.leaveEnd.set('');
   }
 
   protected removeLeave(days: readonly string[]): void {
-    this.patch({ extraDaysOff: this.form().extraDaysOff.filter((d) => !days.includes(d)) });
+    this.patch({ leaveDays: this.form().leaveDays.filter((d) => !days.includes(d)) });
   }
 
   protected showResults(): void {
