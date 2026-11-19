@@ -226,7 +226,16 @@
 
         <fieldset class="field stacked group">
           <legend>Licença ou banco de horas</legend>
-          <p class="hint">Dias que você já tem livres, como licença ou banco de horas.</p>
+          <p class="hint">Dias que você já tem marcados, ou um saldo para o planejador encaixar.</p>
+          <p class="sub">
+            Dias já marcados
+            <span class="count" aria-hidden="true"
+              >({{ leaveRuns().length }}/{{ maxLeaveRuns }})</span
+            >
+            <span class="visually-hidden"
+              >{{ leaveRuns().length }} de {{ maxLeaveRuns }} entradas</span
+            >
+          </p>
           <div class="dates">
             <div class="field stacked">
               <label for="leave-start">Primeiro dia</label>
@@ -251,7 +260,7 @@
           <button
             type="button"
             class="secondary add-leave"
-            [disabled]="!leaveDays()"
+            [disabled]="!leaveDays() || leaveRuns().length >= maxLeaveRuns"
             (click)="addLeave()"
           >
             Adicionar
@@ -281,6 +290,50 @@
                 </li>
               }
             </ul>
+          }
+          @if (form().mode === 'clt') {
+            <p class="sub">Saldo para encaixar</p>
+            <div class="field">
+              <label for="credit">Dias de banco de horas</label>
+              <div class="stepper">
+                <button
+                  type="button"
+                  aria-label="Menos um dia de banco de horas"
+                  [disabled]="form().creditDays <= 0"
+                  (click)="step('creditDays', -1)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
+                </button>
+                <input
+                  id="credit"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  [max]="creditMax"
+                  [value]="form().creditDays"
+                  (input)="typed('creditDays', $any($event.target).value)"
+                />
+                <button
+                  type="button"
+                  aria-label="Mais um dia de banco de horas"
+                  [disabled]="form().creditDays >= creditMax"
+                  (click)="step('creditDays', 1)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" /></svg>
+                </button>
+              </div>
+            </div>
+            @if (form().creditDays > 0) {
+              <label class="field switch">
+                <span>Tirar todos seguidos</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  [checked]="form().creditInRow"
+                  (change)="patch({ creditInRow: $any($event.target).checked })"
+                />
+              </label>
+            }
           }
         </fieldset>
       </details>
@@ -388,12 +441,24 @@
               <ul class="periods">
                 @for (period of plan.periods; track period.start) {
                   <li>
-                    <b>{{ formatRange(period.start, period.end) }}</b>
-                    <span>
-                      {{ period.daysSpent }}
-                      {{ form().mode === 'clt' ? 'dias de férias' : 'dias úteis' }} →
-                      {{ period.daysOff }} de descanso
-                    </span>
+                    @if (period.credit) {
+                      <b>{{
+                        period.start === period.end
+                          ? formatDay(period.start)
+                          : formatRange(period.start, period.end)
+                      }}</b>
+                      <span>
+                        {{ period.daysSpent }}
+                        {{ period.daysSpent === 1 ? 'dia' : 'dias' }} de banco de horas
+                      </span>
+                    } @else {
+                      <b>{{ formatRange(period.start, period.end) }}</b>
+                      <span>
+                        {{ period.daysSpent }}
+                        {{ form().mode === 'clt' ? 'dias de férias' : 'dias úteis' }} →
+                        {{ period.daysOff }} de descanso
+                      </span>
+                    }
                   </li>
                 }
               </ul>

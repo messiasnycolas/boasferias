@@ -352,6 +352,19 @@ svg {
   color: var(--holiday);
 }
 
+/* Subsection title inside a group; the counter beside it is quiet. */
+.sub {
+  margin: 12px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.count {
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .add-leave {
   justify-self: start;
   margin-top: 6px;

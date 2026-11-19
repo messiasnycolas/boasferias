@@ -11,19 +11,26 @@ const KIND_LABEL: Record<CalendarDay['kind'], string> = {
   none: '',
 };
 
+const FIT_BASE = 27.3;
+const FIT_COUNTED = 16.9;
+const FIT_CREDIT = 10.3;
+
 @Component({
   selector: 'app-plan-months',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="legend-box">
       <p class="legend-title" aria-hidden="true">Legenda</p>
-      <ul class="legend" aria-label="Legenda" [class.long]="hasCounted()">
+      <ul class="legend" aria-label="Legenda" [style.--fit.em]="fit()">
         <li><i class="swatch vacation"></i>Férias</li>
         <li><i class="swatch off"></i>Descanso</li>
-        @if (hasCounted()) {
+        @if (hasKind('counted')) {
           <li><i class="swatch counted"></i>Contado como férias pela CLT</li>
         }
-        <li><b class="holiday-mark">12</b>Feriado ou licença</li>
+        @if (hasKind('credit')) {
+          <li><i class="swatch credit"></i>Banco de horas</li>
+        }
+        <li><b class="holiday-mark">12</b>Feriado ou dia já marcado</li>
       </ul>
     </div>
     <div class="months">
@@ -65,8 +72,17 @@ export class PlanMonths {
   protected readonly weekdays = WEEKDAYS;
   protected readonly name = (m: CalendarMonth) => monthName(m.year, m.month);
 
-  protected hasCounted(): boolean {
-    return this.months().some((m) => m.days.some((d) => d?.kind === 'counted'));
+  protected hasKind(kind: CalendarDay['kind']): boolean {
+    return this.months().some((m) => m.days.some((d) => d?.kind === kind));
+  }
+
+  /** Width in em of the legend on one row; wider items make the row break to a column sooner. */
+  protected fit(): number {
+    return (
+      FIT_BASE +
+      (this.hasKind('counted') ? FIT_COUNTED : 0) +
+      (this.hasKind('credit') ? FIT_CREDIT : 0)
+    );
   }
 
   protected label(day: CalendarDay): string {

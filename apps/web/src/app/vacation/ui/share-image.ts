@@ -13,6 +13,7 @@ const TEXT = 'Figtree Variable';
 /** The card body's free area in the background, in image pixels. */
 const STACK = { top: 208, bottom: 1034, maxWidth: 828 };
 const REST_BASELINE = 1118;
+const REST_SIZE = 42;
 const LINE_GAP = 0.045;
 
 interface Line {
@@ -38,9 +39,13 @@ export async function drawShareImage(total: number, rest: string): Promise<Blob>
     { text: 'DIAS DE', color: ink },
     { text: 'DESCANSO', color: ink },
   ]);
-  ctx.font = `500 42px "${TEXT}"`;
+  ctx.font = `500 ${REST_SIZE}px "${TEXT}"`;
   ctx.fillStyle = token('--muted');
-  ctx.fillText(`partindo de ${rest}`, WIDTH / 2, REST_BASELINE);
+  // With credit the line is longer; shrink it rather than run past the card.
+  const line = `partindo de ${rest}`;
+  const size = Math.min(REST_SIZE, (REST_SIZE * STACK.maxWidth) / ctx.measureText(line).width);
+  ctx.font = `500 ${size}px "${TEXT}"`;
+  ctx.fillText(line, WIDTH / 2, REST_BASELINE);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob(

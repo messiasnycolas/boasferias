@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page, expect, test } from '@playwright/test';
 import { inflateSync } from 'node:zlib';
-import { showPlans } from './helpers';
+import { settled, showPlans } from './helpers';
 
 const firstPlan = (page: Page) => page.locator('.plan').first();
 
@@ -406,6 +406,50 @@ test.describe('with the plans shown', () => {
     await expect(leave).toHaveCount(0);
   });
 
+  test('counts the marked days out of 10 and stops adding at 10', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    const group = page.locator('fieldset', { hasText: 'Dias já marcados' });
+    await expect(group).toContainText('(0/10)');
+    const add = page.getByRole('button', { name: 'Adicionar' });
+    // Every other day, so each one is its own entry.
+    for (let i = 0; i < 10; i++) {
+      await page.getByLabel('Primeiro dia').fill(`${String(2 + 2 * i).padStart(2, '0')}/03/2027`);
+      await add.click();
+      await expect(group).toContainText(`(${i + 1}/10)`);
+    }
+    await expect(group.getByText('10 de 10 entradas')).toBeAttached();
+    await page.getByLabel('Primeiro dia').fill('25/04/2027');
+    await expect(add).toBeDisabled();
+    await group
+      .getByRole('button', { name: /^Remover/ })
+      .first()
+      .click();
+    await expect(group).toContainText('(9/10)');
+    await expect(add).toBeEnabled();
+  });
+
+  test('banco de horas days show as their own row and legend item', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    await page
+      .getByRole('button', { name: 'Mais um dia de banco de horas' })
+      .click({ clickCount: 3 });
+    await expect(page.getByLabel('Dias de banco de horas')).toHaveValue('3');
+    await expect(page.getByText('Tirar todos seguidos')).toBeVisible();
+    await expect(
+      firstPlan(page).locator('.periods li', { hasText: 'banco de horas' }).first(),
+    ).toContainText(/\d+ dias? de banco de horas/);
+    await expect(page.locator('.legend')).toContainText('Banco de horas');
+    await expect(page.locator('.legend')).toContainText('Feriado ou dia já marcado');
+  });
+
+  test('the banco de horas balance is for CLT only', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    await expect(page.getByText('Saldo para encaixar')).toBeVisible();
+    await page.getByRole('radio', { name: 'PJ' }).click();
+    await expect(page.getByText('Saldo para encaixar')).toHaveCount(0);
+    await expect(page.getByLabel('Dias de banco de horas')).toHaveCount(0);
+  });
+
   test('opening another plan on the calendar scrolls to that calendar', async ({ page }) => {
     const planB = page.locator('.plan').nth(1);
     await planB.getByRole('button', { name: 'Ver no calendário' }).click();
@@ -483,6 +527,12 @@ test.describe('with the plans shown', () => {
         await page.getByText('Mais filtros').click();
         await page.getByText('Feriados no período').click();
         await page.getByRole('radio', { name: 'Outra' }).click();
+        await page.getByRole('button', { name: 'Mais um dia de banco de horas' }).click();
+        // The recomputed calendar fades in; axe must not read colours mid-fade.
+        await expect(
+          page.locator('.periods li', { hasText: 'banco de horas' }).first(),
+        ).toBeVisible();
+        await settled(page);
         // Equal options still fit a 360 px phone, each on one line.
         for (const radio of await page
           .getByRole('radiogroup', { name: 'Semana de trabalho' })

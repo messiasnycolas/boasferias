@@ -62,9 +62,14 @@ export function parseBrDate(text: string): string | null {
   return real ? `${y}-${m}-${d}` : null;
 }
 
-/** Share image's last line: "partindo de 30 dias de férias" (CLT) or "… 15 dias úteis" (PJ). */
-export function restFrom(mode: Mode, daysSpent: number): string {
-  return `${daysSpent} ${mode === 'clt' ? 'dias de férias' : 'dias úteis'}`;
+/**
+ * Share image's last line: "partindo de 30 dias de férias" (CLT), "… e 3 de banco de horas" when
+ * some days come from credit, or "… 15 dias úteis" (PJ).
+ */
+export function restFrom(mode: Mode, vacationDays: number, creditDays: number): string {
+  if (mode === 'pj') return `${vacationDays} dias úteis`;
+  const vacation = `${vacationDays} dias de férias`;
+  return creditDays > 0 ? `${vacation} e ${creditDays} de banco de horas` : vacation;
 }
 
 /** "A", "B" … "T": plans are named by letter so the page shows fewer numbers. */

@@ -58,8 +58,10 @@ describe('day and range labels', () => {
 
 describe('share image', () => {
   it('says what the rest started from, in the unit of the mode', () => {
-    expect(restFrom('clt', 30)).toBe('30 dias de férias');
-    expect(restFrom('clt', 20)).toBe('20 dias de férias');
-    expect(restFrom('pj', 15)).toBe('15 dias úteis');
+    expect(restFrom('clt', 30, 0)).toBe('30 dias de férias');
+    expect(restFrom('clt', 20, 0)).toBe('20 dias de férias');
+    expect(restFrom('clt', 30, 3)).toBe('30 dias de férias e 3 de banco de horas');
+    expect(restFrom('clt', 30, 1)).toBe('30 dias de férias e 1 de banco de horas');
+    expect(restFrom('pj', 15, 0)).toBe('15 dias úteis');
   });
 });

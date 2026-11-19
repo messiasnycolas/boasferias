@@ -14,7 +14,8 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
-import { LeaveError, expandLeave, groupLeave } from '../application/leave-days';
+import { CREDIT_MAX_DAYS } from '../domain/credit';
+import { LeaveError, MAX_LEAVE_RUNS, expandLeave, groupLeave } from '../application/leave-days';
 import { planCalendar } from '../application/plan-calendar';
 import { Uf } from '../../calendar/domain/state-holidays';
 import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
@@ -35,6 +36,7 @@ import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
 import { STATE_OPTIONS, saveState, savedState } from './states';
 
+type StepField = 'days' | 'maxPeriods' | 'creditDays';
 type WeekPreset = keyof typeof WORK_WEEKS | 'custom';
 
 const RECOMPUTE_DELAY_MS = 250;
@@ -73,7 +75,7 @@ export class PlannerPage {
   protected readonly sharing = signal<number | null>(null);
   protected readonly shareFailed = signal<number | null>(null);
   protected readonly customWeek = signal(false);
-  /** "Licença ou banco de horas": first day required, last day optional (a range). */
+  /** "Dias já marcados": first day required, last day optional (a range). */
   protected readonly leaveStart = signal('');
   protected readonly leaveEnd = signal('');
   private readonly leave = computed(() =>
@@ -88,6 +90,8 @@ export class PlannerPage {
     return leave && !leave.ok ? LEAVE_MESSAGES[leave.error] : null;
   });
   protected readonly leaveRuns = computed(() => groupLeave(this.form().leaveDays));
+  protected readonly maxLeaveRuns = MAX_LEAVE_RUNS;
+  protected readonly creditMax = CREDIT_MAX_DAYS;
 
   protected readonly weekChips = WEEKDAY_CHIPS;
   protected readonly weekNames = WEEKDAY_NAMES;
@@ -194,15 +198,20 @@ export class PlannerPage {
     this.patch({ state, city: null });
   }
 
-  protected step(field: 'days' | 'maxPeriods', delta: number): void {
-    const [min, max] = field === 'days' ? this.limits().days : this.limits().periods;
+  protected step(field: StepField, delta: number): void {
+    const [min, max] = this.range(field);
     const value = Math.min(max, Math.max(min, this.form()[field] + delta));
     this.patch({ [field]: value });
   }
 
-  protected typed(field: 'days' | 'maxPeriods', value: string): void {
+  protected typed(field: StepField, value: string): void {
     const number = Number(value);
     if (value !== '' && Number.isFinite(number)) this.patch({ [field]: number });
+  }
+
+  private range(field: StepField): readonly [number, number] {
+    if (field === 'creditDays') return [0, CREDIT_MAX_DAYS];
+    return field === 'days' ? this.limits().days : this.limits().periods;
   }
 
   protected setWeek(preset: WeekPreset): void {
@@ -227,7 +236,7 @@ export class PlannerPage {
 
   protected addLeave(): void {
     const days = this.leaveDays();
-    if (!days) return;
+    if (!days || this.leaveRuns().length >= MAX_LEAVE_RUNS) return;
     const all = new Set([...this.form().leaveDays, ...days]);
     this.patch({ leaveDays: [...all].sort() });
     this.leaveStart.set('');
@@ -303,7 +312,10 @@ export class PlannerPage {
     this.shareFailed.set(null);
     try {
       const { drawShareImage } = await import('./share-image');
-      const blob = await drawShareImage(plan.daysOff, restFrom(input.mode, plan.daysSpent));
+      const blob = await drawShareImage(
+        plan.daysOff,
+        restFrom(input.mode, plan.daysSpent - plan.creditDays, plan.creditDays),
+      );
       const name = `boas-ferias-plano-${planLetter(index).toLowerCase()}.jpg`;
       const file = new File([blob], name, { type: 'image/jpeg' });
       const phone = window.matchMedia('(pointer: coarse)').matches;
