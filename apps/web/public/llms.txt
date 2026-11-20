@@ -1,0 +1,7 @@
+# Boas Férias
+
+> Calculadora gratuita que mostra as melhores datas para tirar férias no Brasil, para CLT e PJ. Junta férias com fins de semana e feriados nacionais, estaduais e municipais para render mais dias de descanso, seguindo as regras da CLT (arts. 130 a 145).
+
+## Páginas
+
+- [Calculadora de férias](https://boasferias.app.br/): escolha quantos dias tem, o período e o estado; o site lista os planos com mais dias de descanso. Inclui perguntas frequentes sobre férias na CLT.

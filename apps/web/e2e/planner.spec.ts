@@ -63,12 +63,12 @@ test.describe('before the first click', () => {
   });
 
   test('is only as tall as its content on a phone', async ({ page }) => {
-    const formBottom = await page
-      .locator('form')
-      .evaluate((form) => form.getBoundingClientRect().bottom + scrollY);
+    const faqBottom = await page
+      .locator('.faq .card')
+      .evaluate((card) => card.getBoundingClientRect().bottom + scrollY);
     // The body, not the document: a document is never shorter than the window.
     const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
-    expect(height - formBottom).toBeLessThanOrEqual(24); // the layout's bottom padding
+    expect(height - faqBottom).toBeLessThanOrEqual(32); // the FAQ's bottom padding
   });
 
   for (const size of [
@@ -77,6 +77,7 @@ test.describe('before the first click', () => {
   ]) {
     test(`fills a ${size.width}x${size.height} screen with sea, no gap`, async ({ page }) => {
       await page.setViewportSize(size);
+      await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
       const bottom: number[][] = [];
       for (const x of [0, size.width / 2, size.width - 1]) {
         const pixel = await page.screenshot({
@@ -899,5 +900,35 @@ test.describe('sharing on a phone', () => {
     await firstPlan(page).getByRole('button', { name: 'Compartilhar' }).click();
     await expect.poll(() => page.evaluate(() => (window as any).shared.length)).toBe(1);
     await expect(page.getByRole('alert')).toHaveCount(0);
+  });
+});
+
+test.describe('FAQ', () => {
+  test('ships in the page HTML with its search data, and opens on tap', async ({
+    page,
+    request,
+  }) => {
+    const html = await (await request.get('/')).text();
+    expect(html).toContain('Quantos dias de férias tenho na CLT?');
+    const types = [
+      ...html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/g),
+    ].map((m) => JSON.parse(m[1])['@type']);
+    expect(types.sort()).toEqual(['FAQPage', 'WebApplication']);
+
+    const faq = page.getByRole('region', { name: 'Perguntas frequentes' });
+    const answer = faq.getByText(/art\. 134, §1º/);
+    await expect(answer).toBeHidden();
+    await faq.getByText('Posso dividir as férias?').click();
+    await expect(answer).toBeVisible();
+    await faq.getByText('Posso dividir as férias?').click();
+    await expect(answer).toBeHidden();
+    const { violations } = await new AxeBuilder({ page }).include('.faq').analyze();
+    expect(violations).toEqual([]);
+  });
+
+  test('llms.txt tells AI tools what the site does', async ({ request }) => {
+    const response = await request.get('/llms.txt');
+    expect(response.ok()).toBe(true);
+    expect(await response.text()).toContain('# Boas Férias');
   });
 });

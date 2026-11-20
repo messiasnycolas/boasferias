@@ -626,6 +626,30 @@ h3 {
   font-size: 13px;
 }
 
+/* Under the calculator in every state; a readable measure even when the plans widen the column. */
+.faq {
+  max-width: min(var(--column), 720px);
+  margin: 0 auto;
+  padding: 8px 16px 32px;
+}
+
+.faq summary {
+  gap: 12px;
+}
+
+/* Long questions wrap; the arrow keeps its size. */
+.faq summary svg {
+  flex-shrink: 0;
+}
+
+.faq p {
+  margin: 0;
+}
+
+.faq .fine {
+  margin-top: 16px;
+}
+
 @media (min-width: 960px) {
   .layout.revealed {
     grid-template-columns: 380px 1fr;

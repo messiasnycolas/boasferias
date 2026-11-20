@@ -27,6 +27,8 @@ Locally, `e2e` and `lighthouse` run in Playwright's Docker image (WSL lacks Chro
 
 City holidays live in `apps/web/public/holidays/<uf>.json`, generated from the pinned open dataset (ADR 0002): `npm run holidays:cities` (needs network) rewrites them; commit the result. The page fetches a state's file only when that state is chosen.
 
+Search and AI tools read the prerendered HTML: `index.html` carries the meta tags, canonical URL and WebApplication JSON-LD; the FAQ under the calculator (`src/app/vacation/ui/faq.ts`) renders its questions and adds the matching FAQPage JSON-LD to `<head>` from the same list. `public/llms.txt` describes the site for AI tools; `robots.txt` allows every crawler. Update the FAQ's "Atualizado em" date when its text or the law changes.
+
 The planner runs in a Web Worker (`src/app/vacation/ui/planner.worker.ts`); the UI calls only `vacation/application`. Plans are computed in the background from page load (the holiday list needs them) but shown only after the first "Ver melhores datas" click; after that they update live as the form changes.
 
 ## Deploy

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DOCUMENT,
   DestroyRef,
   ElementRef,
   Injector,
@@ -13,6 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { FAQS, FAQ_UPDATED, addFaqJsonLd } from './faq';
 import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
 import { CREDIT_MAX_DAYS } from '../domain/credit';
 import { LeaveError, MAX_LEAVE_RUNS, expandLeave, groupLeave } from '../application/leave-days';
@@ -167,8 +169,11 @@ export class PlannerPage {
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private timer: ReturnType<typeof setTimeout> | undefined;
+  protected readonly faqs = FAQS;
+  protected readonly faqUpdated = FAQ_UPDATED;
 
   constructor() {
+    addFaqJsonLd(inject(DOCUMENT));
     if (this.client) {
       const state = savedState();
       if (state) this.patch({ state });
