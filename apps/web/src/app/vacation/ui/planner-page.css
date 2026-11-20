@@ -365,7 +365,7 @@ svg {
   color: var(--muted);
 }
 
-.add-leave {
+.add-button {
   justify-self: start;
   margin-top: 6px;
 }

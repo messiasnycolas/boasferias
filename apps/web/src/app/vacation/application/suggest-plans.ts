@@ -176,15 +176,20 @@ export function holidayContext(
   for (let year = yearOf(from) - 1; year <= yearOf(to) + 1; year++)
     defaults.push(...holidays(year, input.state ?? undefined, input.city ?? undefined));
   const removedSet = new Set(removed);
+  // A default's own entry decides it, so removing it works even if it was also added.
+  const known = new Set(defaults.map((h) => h.date));
   const daysOff = new DaysOff(
     input.workWeek,
-    [...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)), ...added],
+    [
+      ...defaults.map((h) => h.date).filter((date) => !removedSet.has(date)),
+      ...added.filter((date) => !known.has(date)),
+    ],
     leave,
   );
   return { defaults, daysOff };
 }
 
-/** Holidays in the window: defaults plus the added days, once each, by date. */
+/** Defaults in the window plus every added day (even outside it, so it can be removed), by date. */
 function listedHolidays(
   defaults: readonly Holiday[],
   added: readonly DayNumber[],
@@ -194,7 +199,7 @@ function listedHolidays(
   const inWindow = (date: DayNumber) => date >= from && date <= to;
   const known = new Set(defaults.map((h) => h.date));
   const extra = [...new Set(added)]
-    .filter((date) => inWindow(date) && !known.has(date))
+    .filter((date) => !known.has(date))
     .map((date) => ({ date, name: ADDED_HOLIDAY, added: true }));
   const base = defaults.filter((h) => inWindow(h.date)).map((h) => ({ ...h, added: false }));
   return [...base, ...extra]

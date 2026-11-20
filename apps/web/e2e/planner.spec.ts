@@ -352,6 +352,11 @@ test.describe('with the plans shown', () => {
     await page.getByText('Feriados no período').click();
     const add = page.getByRole('button', { name: 'Adicionar feriado', exact: true });
     await expect(add).toBeDisabled();
+    // Erased text means no date, not the last one typed.
+    await page.getByLabel('Adicionar feriado', { exact: true }).fill('12/05/2027');
+    await expect(add).toBeEnabled();
+    await page.getByLabel('Adicionar feriado', { exact: true }).fill('12/05');
+    await expect(add).toBeDisabled();
     await page.getByLabel('Adicionar feriado', { exact: true }).fill('12/05/2027');
     await add.click();
     const item = page.locator('.holidays li', { hasText: 'Feriado adicionado' });

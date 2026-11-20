@@ -7,6 +7,7 @@ import {
   output,
   signal,
   viewChild,
+  untracked,
 } from '@angular/core';
 import { maskBrDate, parseBrDate, toBrDate } from './format';
 
@@ -52,13 +53,21 @@ export class DateField {
   /** ISO date or "" (empty). */
   readonly value = input.required<string>();
   readonly valueChange = output<string>();
+  /** For the "Adicionar" fields: half-typed or erased text means no date, not the last one. */
+  readonly clearsWhenIncomplete = input(false);
 
   protected readonly text = signal('');
   protected readonly toBr = toBrDate;
   private readonly native = viewChild.required<ElementRef<HTMLInputElement>>('native');
 
   constructor() {
-    effect(() => this.text.set(toBrDate(this.value())));
+    // Only a value that differs from the text replaces it, so half-typed text survives a "".
+    effect(() => {
+      const value = this.value();
+      untracked(() => {
+        if (value !== (parseBrDate(this.text()) ?? '')) this.text.set(toBrDate(value));
+      });
+    });
   }
 
   protected typed(field: HTMLInputElement): void {
@@ -67,6 +76,7 @@ export class DateField {
     this.text.set(masked);
     const iso = parseBrDate(masked);
     if (iso && iso !== this.value()) this.valueChange.emit(iso);
+    else if (!iso && this.clearsWhenIncomplete() && this.value()) this.valueChange.emit('');
   }
 
   protected picked(iso: string): void {

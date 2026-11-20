@@ -19,7 +19,14 @@ import { LeaveError, MAX_LEAVE_RUNS, expandLeave, groupLeave } from '../applicat
 import { planCalendar } from '../application/plan-calendar';
 import { parseIsoDate } from '../../calendar/domain/calendar-date';
 import { Uf } from '../../calendar/domain/state-holidays';
-import { LIMITS, MAX_LIMIT, Mode, SuggestInput, SuggestResult } from '../application/suggest-plans';
+import {
+  HolidayView,
+  LIMITS,
+  MAX_LIMIT,
+  Mode,
+  SuggestInput,
+  SuggestResult,
+} from '../application/suggest-plans';
 import {
   ERROR_MESSAGES,
   formatDate,
@@ -247,14 +254,18 @@ export class PlannerPage {
   protected addHoliday(): void {
     const date = this.holidayDate();
     if (!this.canAddHoliday()) return;
+    // Adding a removed default restores it; an added day that is a default changes nothing.
     const { removedHolidays, addedHolidays } = this.form();
-    const listed = this.holidays().find((h) => h.date === date);
-    if (listed && !listed.added && removedHolidays.includes(date)) {
-      this.patch({ removedHolidays: removedHolidays.filter((d) => d !== date) });
-    } else if (!listed && !addedHolidays.includes(date)) {
-      this.patch({ addedHolidays: [...addedHolidays, date].sort() });
-    }
+    this.patch({
+      removedHolidays: removedHolidays.filter((d) => d !== date),
+      addedHolidays: [...new Set([...addedHolidays, date])].sort(),
+    });
     this.holidayDate.set('');
+  }
+
+  protected holidayAction(h: HolidayView): string {
+    if (h.added) return `Remover ${h.name} de ${this.formatDate(h.date)}`;
+    return (this.form().removedHolidays.includes(h.date) ? 'Considerar ' : 'Remover ') + h.name;
   }
 
   protected removeAddedHoliday(date: string): void {

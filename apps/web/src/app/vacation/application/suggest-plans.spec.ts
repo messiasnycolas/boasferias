@@ -62,7 +62,7 @@ describe('suggestPlans', () => {
 
   it("adds the chosen city's holidays", () => {
     const window = { earliestStart: '2027-01-04', deadline: '2027-01-31', leaveDays: [] };
-    const city = [{ month: 1, day: 25, name: 'Aniversário da Cidade', added: false }];
+    const city = [{ month: 1, day: 25, name: 'Aniversário da Cidade' }];
     const result = run({ ...window, state: 'SP', city });
     if (!result.ok) throw new Error(result.error);
     expect(result.holidays).toEqual([
@@ -119,6 +119,23 @@ describe('suggestPlans', () => {
     });
     if (!window.ok) throw new Error(window.error);
     expect(window.holidays.map((h) => h.added)).toEqual([false]);
+  });
+
+  it('lists added days outside the window, and a removed default stays removed if added', () => {
+    const outside = run({ addedHolidays: ['2027-10-05'] });
+    if (!outside.ok) throw new Error(outside.error);
+    expect(outside.holidays).toEqual([
+      { date: '2027-10-05', name: 'Feriado adicionado', added: true },
+    ]);
+    const week = {
+      earliestStart: '2027-09-06',
+      deadline: '2027-09-10',
+      mode: 'pj' as const,
+      days: 1,
+    };
+    const both = run({ ...week, addedHolidays: ['2027-09-07'], removedHolidays: ['2027-09-07'] });
+    if (!both.ok) throw new Error(both.error);
+    expect(both.plans[0].daysOff).toBe(3); // no bridge to Tuesday 7: it is removed
   });
 
   it('an added holiday blocks CLT starts in the 2 days before it', () => {

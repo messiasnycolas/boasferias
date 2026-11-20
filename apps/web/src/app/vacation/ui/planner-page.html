@@ -241,6 +241,7 @@
               <label for="leave-start">Primeiro dia</label>
               <app-date-field
                 inputId="leave-start"
+                [clearsWhenIncomplete]="true"
                 [value]="leaveStart()"
                 (valueChange)="leaveStart.set($event)"
               />
@@ -249,6 +250,7 @@
               <label for="leave-end">Último dia (opcional)</label>
               <app-date-field
                 inputId="leave-end"
+                [clearsWhenIncomplete]="true"
                 [value]="leaveEnd()"
                 (valueChange)="leaveEnd.set($event)"
               />
@@ -259,7 +261,7 @@
           }
           <button
             type="button"
-            class="secondary add-leave"
+            class="secondary add-button"
             [disabled]="!canAddLeave()"
             (click)="addLeave()"
           >
@@ -350,33 +352,17 @@
                 <span
                   ><b>{{ formatDay(h.date) }}</b> {{ h.name }}</span
                 >
-                @if (h.added) {
-                  <button
-                    type="button"
-                    class="toggle-x"
-                    [attr.aria-label]="'Remover ' + h.name + ' de ' + formatDate(h.date)"
-                    (click)="removeAddedHoliday(h.date)"
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 7l10 10M17 7L7 17" />
-                    </svg>
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="toggle-x"
-                    [class.added]="form().removedHolidays.includes(h.date)"
-                    [attr.aria-label]="
-                      (form().removedHolidays.includes(h.date) ? 'Considerar ' : 'Remover ') +
-                      h.name
-                    "
-                    (click)="toggleHoliday(h.date)"
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 7l10 10M17 7L7 17" />
-                    </svg>
-                  </button>
-                }
+                <button
+                  type="button"
+                  class="toggle-x"
+                  [class.added]="form().removedHolidays.includes(h.date)"
+                  [attr.aria-label]="holidayAction(h)"
+                  (click)="h.added ? removeAddedHoliday(h.date) : toggleHoliday(h.date)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 7l10 10M17 7L7 17" />
+                  </svg>
+                </button>
               </li>
             }
           </ul>
@@ -388,6 +374,7 @@
             <label for="holiday-add">Adicionar feriado</label>
             <app-date-field
               inputId="holiday-add"
+              [clearsWhenIncomplete]="true"
               [value]="holidayDate()"
               (valueChange)="holidayDate.set($event)"
             />
@@ -395,7 +382,7 @@
         </div>
         <button
           type="button"
-          class="secondary add-leave"
+          class="secondary add-button"
           [disabled]="!canAddHoliday()"
           (click)="addHoliday()"
         >
