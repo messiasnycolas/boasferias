@@ -72,7 +72,7 @@ const MAX_OPTIONS = 8;
             Não temos os feriados desta cidade. Adicione-os em "Feriados no período".
           </p>
         } @else {
-          <p class="hint">Feriados da cidade de fonte comunitária; confira com sua empresa.</p>
+          <p class="hint">Feriados da cidade vêm de uma base aberta; confira com sua empresa.</p>
         }
       }
     }

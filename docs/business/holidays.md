@@ -72,14 +72,14 @@ yearly rule when 2025 and 2026 both have it on the same date, or at the same dis
 (about 96% of the entries); anything else is dropped. Its generic name "Feriado Municipal" is shown
 as "Feriado municipal".
 
-The dataset is not verified: the page says so under the city ("fonte comunitária; confira com sua
+The dataset is not verified: the page says so under the city ("vêm de uma base aberta; confira com sua
 empresa"), and for a city with no data it asks the user to add the days in "Mais filtros".
 
 ### Capitals (checked Nov 2026)
 
 Each capital's days are checked against city law, the city's yearly decree, or a court calendar
 that cites the law, and replace the dataset's entry (`CAPITALS` in
-`apps/web/src/app/calendar/domain/capital-holidays.ts`); the page shows no "fonte comunitária"
+`apps/web/src/app/calendar/domain/capital-holidays.ts`); the page shows no "base aberta"
 hint for them. Good Friday is national in the app, and days that are already national or state
 are not repeated. Corpus Christi is listed only where the city (or, in RJ, the state) declares it.
 

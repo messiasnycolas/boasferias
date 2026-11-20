@@ -731,7 +731,7 @@ test.describe('city', () => {
     await city(page).press('ArrowDown');
     await city(page).press('Enter');
     await expect(city(page)).toHaveValue('Santos');
-    await expect(page.getByText('fonte comunitária')).toBeVisible();
+    await expect(page.getByText('base aberta')).toBeVisible();
     await showPlans(page);
     await page.getByText('Feriados no período').click();
     const holidays = page.locator('.holidays');
@@ -756,7 +756,7 @@ test.describe('city', () => {
       .getByText('Boa Vista', { exact: true })
       .click();
     await expect(city(page)).toHaveValue('Boa Vista');
-    await expect(page.getByText('fonte comunitária')).toHaveCount(0);
+    await expect(page.getByText('base aberta')).toHaveCount(0);
     await showPlans(page);
     await page.getByText('Feriados no período').click();
     // Only the checked rules have it; the community dataset missed it.
@@ -772,7 +772,7 @@ test.describe('city', () => {
       .getByText('Brasília', { exact: true })
       .click();
     await expect(city(page)).toHaveValue('Brasília');
-    await expect(page.getByText(/Não temos os feriados|fonte comunitária/)).toHaveCount(0);
+    await expect(page.getByText(/Não temos os feriados|base aberta/)).toHaveCount(0);
   });
 
   test('works by keyboard and passes axe', async ({ page }) => {
