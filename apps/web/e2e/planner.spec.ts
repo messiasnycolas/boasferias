@@ -926,6 +926,14 @@ test.describe('FAQ', () => {
     expect(violations).toEqual([]);
   });
 
+  test('keeps its width when the plans show on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const width = async () => (await page.locator('.faq .card').boundingBox())!.width;
+    const before = await width();
+    await showPlans(page);
+    expect(await width()).toBe(before);
+  });
+
   test('llms.txt tells AI tools what the site does', async ({ request }) => {
     const response = await request.get('/llms.txt');
     expect(response.ok()).toBe(true);

@@ -38,11 +38,11 @@ export const FAQS: readonly Faq[] = [
   {
     question: 'E se eu for PJ?',
     answer:
-      'Não há regra da CLT: você escolhe quantos dias úteis parar. O Boas Férias encaixa esses dias entre fins de semana e feriados.',
+      'Depende do contrato com a empresa. A CLT não vale para PJ: algumas empresas pagam dias de descanso, outras não, e cada uma tem as suas regras. Escolha "PJ" e informe quantos dias úteis você pode parar e em quantas partes. O Boas Férias segue essas regras e encaixa os dias entre fins de semana e feriados.',
   },
 ];
 
-export const FAQ_UPDATED = '20/11/2026';
+export const FAQ_UPDATED = '23/11/2026';
 
 const JSON_LD_ID = 'faq-json-ld';
 
