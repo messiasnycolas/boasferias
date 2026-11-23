@@ -926,12 +926,15 @@ test.describe('FAQ', () => {
     expect(violations).toEqual([]);
   });
 
-  test('keeps its width when the plans show on desktop', async ({ page }) => {
+  test('is as wide as the form and under it on desktop, before and after the plans show', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    const width = async () => (await page.locator('.faq .card').boundingBox())!.width;
-    const before = await width();
+    const box = async (selector: string) => (await page.locator(selector).boundingBox())!;
+    expect((await box('.faq .card')).width).toBe((await box('form')).width);
     await showPlans(page);
-    expect(await width()).toBe(before);
+    const [faq, form] = [await box('.faq .card'), await box('form')];
+    expect([faq.x, faq.width]).toEqual([form.x, form.width]);
   });
 
   test('llms.txt tells AI tools what the site does', async ({ request }) => {

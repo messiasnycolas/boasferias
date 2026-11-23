@@ -626,9 +626,9 @@ h3 {
   font-size: 13px;
 }
 
-/* Under the calculator; one width before and after the plans show, a readable measure. */
+/* As wide as the form and under it, before and after the plans show. */
 .faq {
-  max-width: 720px;
+  max-width: var(--column);
   margin: 0 auto;
   padding: 8px 16px 32px;
 }
@@ -678,6 +678,10 @@ h3 {
 
   .results {
     padding-top: 64px;
+  }
+
+  .faq .card {
+    max-width: 380px;
   }
 }
 
