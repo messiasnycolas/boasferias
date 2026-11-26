@@ -91,3 +91,22 @@ test('the sitemap and llms.txt list every page', async ({ request }) => {
     expect(llms).toContain(`https://boasferias.app.br${path}`);
   }
 });
+
+test('"Pague um café" gives a Pix code to copy and a QR code', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/sobre');
+  const footer = page.locator('app-site-footer');
+  await footer.getByRole('button', { name: 'Pague um café via Pix' }).click();
+  // The radios are drawn as chips: tap the label, like a person would.
+  await footer.locator('label', { hasText: '20' }).click();
+  await expect(footer.getByRole('radio', { name: /20/ })).toBeChecked();
+  await expect(footer.getByRole('img', { name: 'QR code do Pix' })).toBeVisible();
+  await footer.getByRole('button', { name: 'Copiar código Pix' }).click();
+  await expect(footer.getByText('Código copiado')).toBeVisible();
+  const code = await page.evaluate(() => navigator.clipboard.readText());
+  expect(code).toMatch(
+    /^000201.*contato@messias\.software.*540520\.00.*BOASFERIAS6304[0-9A-F]{4}$/,
+  );
+  const { violations } = await new AxeBuilder({ page }).include('app-site-footer').analyze();
+  expect(violations).toEqual([]);
+});

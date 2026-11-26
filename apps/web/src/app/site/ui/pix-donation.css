@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  grid-column: 1 / -1;
+}
+
+.coffee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+
+.coffee p {
+  margin: 0;
+}
+
+.raised {
+  width: auto;
+}
+
+/* The sand card on the sea: amounts, QR code, copy. */
+.sheet {
+  --focus: var(--ink);
+  margin-top: 20px;
+  padding: 16px 20px 20px;
+  color: var(--ink);
+}
+
+.sheet[hidden] {
+  display: none;
+}
+
+.amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Native radios (arrow keys, one tab stop), drawn as chips. */
+.amounts label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--edge);
+  border-radius: 12px;
+  background: var(--coconut);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.amounts input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.amounts label:has(:checked) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--coconut);
+}
+
+.amounts label:has(:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.pay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 20px;
+  margin-top: 16px;
+}
+
+.qr {
+  width: 160px;
+  height: 160px;
+  flex: none;
+  border-radius: 12px;
+  background: #fff;
+  fill: var(--ink);
+}
+
+.qr.missing {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.how {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.status {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.code {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--edge);
+  border-radius: 10px;
+  background: var(--coconut);
+  font-size: 13px;
+}
+
+.fine {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}

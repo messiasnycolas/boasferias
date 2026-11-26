@@ -6,5 +6,6 @@ The pages around the calculator: guides, about, privacy, contact, and the parts 
 - `ui/content-page.ts`: the reading layout (sky with the name, one card, footer); `ui/article.css` styles its card.
 - `ui/guides.ts`: the guide texts. A link inside a text is written `[text](/path)`. `ui/guide-links.ts` keeps names and addresses apart, so the routes and the footer load without the texts.
 - `ui/logo.ts`, `ui/site-footer.ts`: shared by the home page too.
+- `domain/pix.ts` and `ui/pix-donation.ts`: "Pague um café" in the footer. A static Pix code (Banco Central's BR Code) for Messias Software's key, with the txid `BOASFERIAS` so site donations stand out in the bank statement; the QR library (`qrcode-generator`) loads only when the panel opens.
 
 Glossary: guia (guide) is a page that explains one CLT vacation rule and links to the calculator.

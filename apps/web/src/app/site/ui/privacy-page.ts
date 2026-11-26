@@ -35,6 +35,12 @@ export const PRIVACY_UPDATED = '25/11/2026';
             entregar as páginas e proteger o serviço.
           </p>
 
+          <h2>Doações por Pix</h2>
+          <p>
+            Se você pagar um café, o Pix vai direto do seu banco para o da Messias Software. O site
+            só mostra o código; ele não vê nem guarda os seus dados de pagamento.
+          </p>
+
           <h2>Anúncios</h2>
           <p>
             Quando o site exibir anúncios do Google AdSense, o Google e seus parceiros poderão usar

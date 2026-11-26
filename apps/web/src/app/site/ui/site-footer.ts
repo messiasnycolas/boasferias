@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GUIDE_LINKS } from './guide-links';
+import { PixDonation } from './pix-donation';
 
 /** On the sea under every page, as wide as the page's column (`--column`). */
 @Component({
   selector: 'app-site-footer',
-  imports: [RouterLink],
+  imports: [PixDonation, RouterLink],
   template: `
     <footer>
+      <app-pix-donation />
       <nav aria-labelledby="footer-guides">
         <h2 id="footer-guides">Guias</h2>
         <ul>

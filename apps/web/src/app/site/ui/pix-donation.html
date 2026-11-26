@@ -1,0 +1,77 @@
+<div class="coffee">
+  <p>O Boas Férias é grátis. Ajudou você?</p>
+  <button
+    type="button"
+    class="raised"
+    [attr.aria-expanded]="open()"
+    aria-controls="pix-sheet"
+    (click)="toggle()"
+  >
+    Pague um café via Pix
+  </button>
+</div>
+
+<div id="pix-sheet" class="sheet card" [hidden]="!open()">
+  <fieldset class="amounts">
+    <legend class="visually-hidden">Valor</legend>
+    @for (cents of amounts; track cents) {
+      <label>
+        <input
+          type="radio"
+          name="pix-amount"
+          [checked]="amount() === cents"
+          (change)="choose(cents)"
+        />
+        {{ brl(cents) }}
+      </label>
+    }
+    <label>
+      <input type="radio" name="pix-amount" [checked]="amount() === null" (change)="choose(null)" />
+      Outro
+    </label>
+  </fieldset>
+
+  <div class="pay">
+    @if (qr(); as qr) {
+      <svg
+        class="qr"
+        [attr.viewBox]="'-4 -4 ' + (qr.size + 8) + ' ' + (qr.size + 8)"
+        role="img"
+        aria-label="QR code do Pix"
+      >
+        <path [attr.d]="qr.path" />
+      </svg>
+    } @else if (qrFailed()) {
+      <p class="qr missing">Não deu para carregar o QR code. Use "Copiar código Pix".</p>
+    } @else {
+      <div class="qr" aria-hidden="true"></div>
+    }
+    <div class="how">
+      <button type="button" class="raised light" (click)="copy()">Copiar código Pix</button>
+      <p class="status" aria-live="polite">
+        @switch (copied()) {
+          @case ('yes') {
+            Código copiado. Cole no app do banco, em Pix Copia e Cola.
+          }
+          @case ('failed') {
+            Não deu para copiar. Selecione o código abaixo.
+          }
+          @default {
+            No celular, copie o código e cole no app do banco. No computador, escaneie o QR code.
+          }
+        }
+      </p>
+    </div>
+  </div>
+  @if (copied() === 'failed') {
+    <input
+      #codeField
+      class="code"
+      readonly
+      [value]="code()"
+      aria-label="Código Pix"
+      (focus)="codeField.select()"
+    />
+  }
+  <p class="fine">Vai para a Messias Software, que faz o Boas Férias. Obrigado!</p>
+</div>
