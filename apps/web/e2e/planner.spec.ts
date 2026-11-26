@@ -63,12 +63,12 @@ test.describe('before the first click', () => {
   });
 
   test('is only as tall as its content on a phone', async ({ page }) => {
-    const faqBottom = await page
-      .locator('.faq .card')
-      .evaluate((card) => card.getBoundingClientRect().bottom + scrollY);
+    const footerBottom = await page
+      .locator('app-site-footer')
+      .evaluate((footer) => footer.getBoundingClientRect().bottom + scrollY);
     // The body, not the document: a document is never shorter than the window.
     const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
-    expect(height - faqBottom).toBeLessThanOrEqual(32); // the FAQ's bottom padding
+    expect(height - footerBottom).toBeLessThanOrEqual(1);
   });
 
   for (const size of [

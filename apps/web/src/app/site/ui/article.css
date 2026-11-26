@@ -1,0 +1,123 @@
+/* Reading cards: guides, privacy, about, contact. The palm head holds the page title. */
+h1.card-head {
+  display: block;
+  padding: 18px 20px;
+  font-size: clamp(22px, 5.5vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.card-body {
+  padding: 20px 20px 24px;
+  font-size: 17px;
+}
+
+.lead {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+h2 {
+  margin: 32px 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+p,
+ul {
+  margin: 0 0 12px;
+}
+
+li + li {
+  margin-top: 6px;
+}
+
+/* Links on their own line are full 44 px touch targets. */
+.others {
+  padding-left: 20px;
+}
+
+.others li + li {
+  margin-top: 0;
+}
+
+.others a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+a {
+  color: var(--sea);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.fine {
+  margin: 24px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Questions: same disclosure as the home FAQ. */
+details + details {
+  border-top: 1px solid var(--line);
+}
+
+summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+details[open] {
+  padding-bottom: 16px;
+}
+
+details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+details p {
+  margin: 0;
+}
+
+/* The trunk: one action back to the calculator. */
+.card-foot p {
+  margin: 0 0 14px;
+  color: var(--sand);
+  font-weight: 600;
+}
+
+a.raised {
+  color: var(--sand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}

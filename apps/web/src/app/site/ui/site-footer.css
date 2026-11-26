@@ -1,0 +1,51 @@
+:host {
+  --focus: var(--coconut);
+  display: block;
+  max-width: var(--column);
+  margin: 0 auto;
+  padding: 8px 16px 40px;
+  color: var(--sand);
+}
+
+footer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgb(243 226 191 / 25%);
+}
+
+h2 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 44 px rows: each link is a full touch target. */
+a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--coconut);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 250 240 / 40%);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+p {
+  grid-column: 1 / -1;
+  margin: 16px 0 0;
+  font-size: 13px;
+}

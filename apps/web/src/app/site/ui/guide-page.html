@@ -1,0 +1,51 @@
+<app-content-page>
+  <article class="card">
+    <h1 class="card-head">{{ guide.heading }}</h1>
+    <div class="card-body">
+      <p class="lead">{{ guide.answer }}</p>
+
+      @for (section of sections; track section.heading) {
+        <h2>{{ section.heading }}</h2>
+        <!-- Spans, not bare text: whitespace around them is dropped, so no space before a comma. -->
+        <p>
+          @for (part of section.parts; track $index) {
+            @if (part.path) {
+              <a [routerLink]="part.path">{{ part.text }}</a>
+            } @else {
+              <span>{{ part.text }}</span>
+            }
+          }
+        </p>
+      }
+
+      <h2>Perguntas frequentes</h2>
+      @for (faq of guide.faqs; track faq.question) {
+        <details>
+          <summary>
+            {{ faq.question }}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+          </summary>
+          <p>{{ faq.answer }}</p>
+        </details>
+      }
+
+      <h2>Outros guias</h2>
+      <ul class="others">
+        @for (other of others; track other.slug) {
+          <li>
+            <a [routerLink]="'/guias/' + other.slug">{{ other.name }}</a>
+          </li>
+        }
+      </ul>
+
+      <p class="fine">
+        Atualizado em {{ updated }}. Baseado na CLT (Decreto-Lei 5.452/1943). Na dúvida, confirme
+        com o RH da sua empresa ou o sindicato.
+      </p>
+    </div>
+    <div class="card-foot">
+      <p>Veja as datas que rendem mais dias de descanso.</p>
+      <a class="raised" routerLink="/">Calcular minhas férias</a>
+    </div>
+  </article>
+</app-content-page>

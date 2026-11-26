@@ -95,6 +95,104 @@ input {
   white-space: nowrap;
 }
 
+/* Shared by every page: the sky header, palm cards and the raised button. */
+
+/* Sky */
+.bar {
+  /* Lighter at the top, today's sky at the horizon; eased steps in OKLab. */
+  background: linear-gradient(
+    var(--sky-top),
+    #d1edf9 16.7%,
+    #c3e7f7 33.3%,
+    #b7e2f5 50%,
+    #afdff4 66.7%,
+    #aaddf3 83.3%,
+    var(--sky)
+  );
+  color: var(--ink);
+  padding: 24px 16px 76px;
+}
+
+/* Cards are palms: leaves on top, sand in the middle, trunk at the base. */
+.card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background:
+    var(--sand-texture) 0 0 / 220px 220px,
+    var(--sand);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 20px;
+  background:
+    var(--palm-texture) left top / 1200px 80px no-repeat,
+    var(--palm);
+  text-shadow: 0 1px 1px rgb(0 0 0 / 15%);
+  color: var(--coconut);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.card-body {
+  padding: 4px 20px 20px;
+}
+
+.card-foot {
+  --focus: var(--coconut);
+  padding: 18px 20px 20px 24px;
+  background: var(--trunk);
+}
+
+/* Main action: a sand outline raised off the trunk; pressing sinks it into its edge. */
+.raised {
+  --glow: 30%;
+  --edge: 0%;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 2px solid var(--sand);
+  border-radius: 10px;
+  /* A step lighter than the trunk: the button reads as its own piece on it. */
+  background: var(--husk);
+  color: var(--sand);
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: -4px 3px 0 var(--sand);
+  cursor: pointer;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+}
+
+/* On the sand: the same floating piece in ink, a step lighter than the card. */
+.raised.light {
+  width: auto;
+  border-color: var(--ink);
+  background: var(--sand-light);
+  color: var(--ink);
+  box-shadow: -4px 3px 0 var(--ink);
+  --glow: 100%;
+  --edge: 7%;
+}
+
+.raised[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.raised:active:not([aria-disabled='true']) {
+  transform: translate(-4px, 3px);
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -169,20 +267,8 @@ app-planner-page .results[aria-busy='true'] {
 
 /* Floating buttons: on hover a band of light crosses them from bottom-left to top-right, the
    colour stays. On the light button the core is full white with faintly shaded edges, so it
-   still reads on near-white. Here, not in the page's styles, which are at their size budget. */
-app-planner-page .raised {
-  --glow: 30%;
-  --edge: 0%;
-  position: relative;
-  overflow: hidden;
-}
-
-app-planner-page .raised.light {
-  --glow: 100%;
-  --edge: 7%;
-}
-
-app-planner-page .raised::after {
+   still reads on near-white. Used on every page. */
+.raised::after {
   content: '';
   position: absolute;
   inset: -60%;
@@ -205,19 +291,19 @@ app-planner-page .days-row > .raised {
 }
 
 @media (hover: hover) {
-  app-planner-page .raised:not([aria-disabled='true']):hover::after {
+  .raised:not([aria-disabled='true']):hover::after {
     transform: translate(55%, -55%);
     transition: transform 900ms ease-in-out;
   }
 }
 
-app-planner-page .raised:focus-visible::after {
+.raised:focus-visible::after {
   transform: translate(55%, -55%);
   transition: transform 900ms ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  app-planner-page .raised::after {
+  .raised::after {
     display: none;
   }
 }

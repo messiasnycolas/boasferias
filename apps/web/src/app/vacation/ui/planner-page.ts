@@ -14,7 +14,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { FAQS, FAQ_UPDATED, addFaqJsonLd } from './faq';
+import { FAQS, FAQ_UPDATED, HOME_DESCRIPTION, homeTitle } from './faq';
+import { RouterLink } from '@angular/router';
+import { Logo } from '../../site/ui/logo';
+import { setPageMeta } from '../../site/ui/page-meta';
+import { SiteFooter } from '../../site/ui/site-footer';
 import { DEFAULT_LIMIT, WORK_WEEKS, defaultInput } from '../application/defaults';
 import { CREDIT_MAX_DAYS } from '../domain/credit';
 import { LeaveError, MAX_LEAVE_RUNS, expandLeave, groupLeave } from '../application/leave-days';
@@ -61,7 +65,7 @@ const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sext
 
 @Component({
   selector: 'app-planner-page',
-  imports: [BackToTop, CityField, DateField, PlanMonths],
+  imports: [BackToTop, CityField, DateField, Logo, PlanMonths, RouterLink, SiteFooter],
   templateUrl: './planner-page.html',
   styleUrls: ['./planner-page.css', './switches.css', './location.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -173,7 +177,12 @@ export class PlannerPage {
   protected readonly faqUpdated = FAQ_UPDATED;
 
   constructor() {
-    addFaqJsonLd(inject(DOCUMENT));
+    setPageMeta(inject(DOCUMENT), {
+      title: homeTitle(todayIso()),
+      description: HOME_DESCRIPTION,
+      path: '/',
+      faqs: FAQS,
+    });
     if (this.client) {
       const state = savedState();
       if (state) this.patch({ state });

@@ -14,22 +14,6 @@
   }
 }
 
-/* Sky */
-.bar {
-  /* Lighter at the top, today's sky at the horizon; eased steps in OKLab. */
-  background: linear-gradient(
-    var(--sky-top),
-    #d1edf9 16.7%,
-    #c3e7f7 33.3%,
-    #b7e2f5 50%,
-    #afdff4 66.7%,
-    #aaddf3 83.3%,
-    var(--sky)
-  );
-  color: var(--ink);
-  padding: 24px 16px 76px;
-}
-
 .bar-inner,
 .tagline {
   max-width: calc(var(--column) - 32px);
@@ -56,12 +40,6 @@ h1 {
   white-space: nowrap;
 }
 
-svg.logo {
-  width: clamp(36px, 10vw, 44px);
-  height: clamp(36px, 10vw, 44px);
-  flex: none;
-}
-
 .tagline {
   margin-top: 12px;
   font-size: 17px;
@@ -80,42 +58,6 @@ svg.logo {
 
 .layout > * {
   min-width: 0;
-}
-
-/* Cards are palms: leaves on top, sand in the middle, trunk at the base. */
-.card {
-  border-radius: var(--radius);
-  overflow: hidden;
-  background:
-    var(--sand-texture) 0 0 / 220px 220px,
-    var(--sand);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
-}
-
-.card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  margin: 0;
-  padding: 14px 20px;
-  background:
-    var(--palm-texture) left top / 1200px 80px no-repeat,
-    var(--palm);
-  text-shadow: 0 1px 1px rgb(0 0 0 / 15%);
-  color: var(--coconut);
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.card-body {
-  padding: 4px 20px 20px;
-}
-
-.card-foot {
-  --focus: var(--coconut);
-  padding: 18px 20px 20px 24px;
-  background: var(--trunk);
 }
 
 .form {
@@ -424,44 +366,6 @@ legend + .hint {
   cursor: default;
 }
 
-/* Main action: a sand outline raised off the trunk; pressing sinks it into its edge. */
-.raised {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 14px;
-  border: 2px solid var(--sand);
-  border-radius: 10px;
-  /* A step lighter than the trunk: the button reads as its own piece on it. */
-  background: var(--husk);
-  color: var(--sand);
-  font-size: 16px;
-  font-weight: 800;
-  box-shadow: -4px 3px 0 var(--sand);
-  cursor: pointer;
-  transition:
-    transform 80ms ease-out,
-    box-shadow 80ms ease-out;
-}
-
-/* On the sand: the same floating piece in ink, a step lighter than the card. */
-.raised.light {
-  width: auto;
-  border-color: var(--ink);
-  background: var(--sand-light);
-  color: var(--ink);
-  box-shadow: -4px 3px 0 var(--ink);
-}
-
-.raised[aria-disabled='true'] {
-  opacity: 0.5;
-  cursor: progress;
-}
-
-.raised:active:not([aria-disabled='true']) {
-  transform: translate(-4px, 3px);
-  box-shadow: none;
-}
-
 /* Results, on the sea */
 .results {
   --focus: var(--coconut);
@@ -469,16 +373,11 @@ legend + .hint {
   color: var(--sand);
 }
 
-h2 {
+/* Card heads are styled in styles.css; this is the title on the sea. */
+.results h2 {
   margin: 8px 0 0;
   font-size: 20px;
   font-weight: 800;
-}
-
-.form h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
 }
 
 .status {
@@ -644,6 +543,11 @@ h3 {
 
 .faq p {
   margin: 0;
+}
+
+.faq a {
+  color: var(--sea);
+  text-underline-offset: 3px;
 }
 
 .faq .fine {

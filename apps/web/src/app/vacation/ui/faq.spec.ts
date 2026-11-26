@@ -1,23 +1,10 @@
-import { FAQS, addFaqJsonLd, faqJsonLd } from './faq';
+import { homeTitle } from './faq';
 
-describe('FAQ data', () => {
-  it('sends search engines the same questions and answers the page shows', () => {
-    const data = JSON.parse(faqJsonLd(FAQS));
-    expect(data['@type']).toBe('FAQPage');
-    expect(
-      data.mainEntity.map((q: { name: string; acceptedAnswer: { text: string } }) => ({
-        question: q.name,
-        answer: q.acceptedAnswer.text,
-      })),
-    ).toEqual(FAQS);
-  });
-
-  it('adds the data to <head> once', () => {
-    addFaqJsonLd(document);
-    addFaqJsonLd(document);
-    const scripts = document.head.querySelectorAll('script[type="application/ld+json"]');
-    expect(scripts).toHaveLength(1);
-    expect(JSON.parse(scripts[0].textContent ?? '').mainEntity).toHaveLength(FAQS.length);
-    scripts[0].remove();
+describe('home title', () => {
+  it('names this year and the next', () => {
+    expect(homeTitle('2026-11-25')).toBe(
+      'Boas Férias | Melhores datas para tirar férias em 2026 e 2027 (CLT e PJ)',
+    );
+    expect(homeTitle('2027-01-01')).toContain('em 2027 e 2028');
   });
 });
