@@ -36,9 +36,9 @@ Days are calendar days: weekends and holidays inside a period count as vacation.
 - Dates are shown and typed as dd/mm/aaaa on every phone (the native picker follows the phone's language, so the page uses its own field).
 - Periods: "up to N". CLT up to 3; PJ up to 10, because unlimited splits always degrade into single days next to weekends.
 - Score: total consecutive days off (vacation and credit plus the non-work days touching them). Extra days = score minus days spent (vacation plus credit). Ties: earliest start. Plans with the same days off are shown once.
+- Company rules ("Regras da empresa", in "Mais filtros"; CLT and PJ, in calendar days): shortest and longest period, and days between periods (0 to 180), counted from the last day of a period to the first of the next. Defaults are no rule; the longest field's top value (CLT 30, PJ 60, since PJ periods span more calendar days than the workdays they spend) means no limit. The law still applies: a shortest period under 5 changes nothing in the CLT, and the CLT longest can't go under 14, since a split needs a 14-day period. Credit days are not periods: no length rule, and they may touch the period before them inside the gap but go nowhere else in it; with credit and a gap together, a plan is rarely missed. Switching CLT/PJ keeps the rules. When the rules leave no plan, the page says so.
 - A CLT plan often has to spend a weekend day at a period edge: with a Mon-Fri week and no holiday nearby, a waste-free period runs Monday to Friday (5, 12, 19, 26 days), and those cannot add up to 30. The UI shows these days as counted by the CLT.
 
 ## Later
 
-- Cooldown between periods (some companies require 1 to 3 months).
 - Shift work with rest days other than Sunday; domestic workers (LC 150/2015); collective vacations (art. 139).

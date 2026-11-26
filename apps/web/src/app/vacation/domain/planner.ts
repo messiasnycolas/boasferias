@@ -30,7 +30,20 @@ export interface PlanSearch {
   limit: number;
   /** Credit days to spend exactly, and where they may go. */
   credit?: { units: number; candidates: readonly Period[] };
+  /** Company rules for vacation periods; credit days are not periods and skip them. */
+  rules?: PeriodRules;
 }
+
+export interface PeriodRules {
+  /** Shortest and longest period, in calendar days. */
+  minLength: number;
+  maxLength: number;
+  /** Days between the end of a period and the start of the next. */
+  gap: number;
+}
+
+/** Calendar days from the first day to the last, whatever the period spends. */
+export const lengthOf = (p: Period) => p.end - p.start + 1;
 
 interface Chain {
   period: Period;
@@ -43,6 +56,8 @@ interface Entry {
   chain: Chain | null;
   /** Hash of the blocks of days off: equal score and key means the same days off. */
   key: number;
+  /** First day (from origin) the next vacation period may start: the company's gap. */
+  ready: number;
 }
 
 type Slots = (Entry[] | undefined)[];
@@ -74,12 +89,23 @@ function insert(slots: Slots, state: number, entry: Entry, capacity: number): bo
  * period). Blocks of days off never touch, except where credit is involved: credit may continue a
  * block (before or after a period, or other credit) and the two count as one.
  *
+ * A company gap holds a plan back until the next period may start, so without credit the result is
+ * still exact. Credit may touch the period before it but goes nowhere else inside the gap, and the
+ * lists of plans ending in credit keep no track of the gap: with both, a plan is rarely missed.
+ *
  * With credit the states multiply, so the search runs with a floor: partial plans that cannot reach
  * it, even with the best vacation and the best credit left counted apart, are dropped. The floor
  * starts at the best such bound and comes down until `limit` plans reach it, so the result is exact.
  */
 export function rankPlans(search: PlanSearch): Plan[] {
-  const { units, maxPeriods, splitNeedsLong, candidates, limit } = search;
+  const { units, maxPeriods, splitNeedsLong, limit } = search;
+  const rules = search.rules;
+  const gap = rules?.gap ?? 0;
+  const candidates = rules
+    ? search.candidates.filter(
+        (c) => lengthOf(c) >= rules.minLength && lengthOf(c) <= rules.maxLength,
+      )
+    : search.candidates;
   if (candidates.length === 0) return [];
   const creditUnits = search.credit?.units ?? 0;
   const all = [...candidates, ...(search.credit?.candidates ?? [])];
@@ -98,7 +124,7 @@ export function rankPlans(search: PlanSearch): Plan[] {
   for (const list of [...vacationAt, ...creditAt]) list.sort((x, y) => x.cost - y.cost);
 
   const bound = creditUnits
-    ? upperBounds(vacationAt, creditAt, origin, days, units, maxPeriods, creditUnits)
+    ? upperBounds(vacationAt, creditAt, origin, days, units, maxPeriods, creditUnits, gap)
     : null;
   if (!bound) return plansFrom(pass(-Infinity));
   // Most days off from day t on with r cost, n periods and q credit left; never below a real plan.
@@ -126,6 +152,7 @@ export function rankPlans(search: PlanSearch): Plan[] {
       first: Number.MAX_SAFE_INTEGER,
       chain: null,
       key: 0,
+      ready: 0,
     });
     // after*[t]: partial plans whose last block ends on day t - 1, so a start on t continues it.
     const afterCredit: Slots[] = Array.from({ length: days + 1 }, () => []);
@@ -189,17 +216,26 @@ export function rankPlans(search: PlanSearch): Plan[] {
             : 0;
         }
         const end = c.offEnd - origin;
-        const target = arrivals[Math.min(end + BLOCK_GAP, days)];
+        const arrival = c.credit
+          ? end + BLOCK_GAP
+          : Math.max(end + BLOCK_GAP, c.end - origin + gap + 1);
+        // A plan waiting out a gap arrives once it is over; then every arrived plan is alike.
+        const waits = gap > 0 && c.credit;
         const touch = creditUnits ? (c.credit ? afterCredit : afterVacation)[end + 1] : undefined;
         // Continuing a block: only the days from the start on are new, and the block's end moves.
         const gain = c.offEnd - (touching ? c.start : c.offStart) + 1;
         // Entries are sorted and all gain the same, so the first rejected one ends the loop.
         for (const entry of list) {
+          // Touching credit: the plan may still be inside its gap.
+          if (!c.credit && c.start - origin < entry.ready) continue;
           const score = entry.score + gain;
           if (score + left < floor) break;
           const first = Math.min(entry.first, c.start);
-          if (fails(target[next], score, first) && (!touch || fails(touch[next], score, first)))
+          const target = arrivals[Math.min(waits ? Math.max(arrival, entry.ready) : arrival, days)];
+          if (fails(target[next], score, first) && (!touch || fails(touch[next], score, first))) {
+            if (waits) continue;
             break;
+          }
           const key = touching
             ? (entry.key - (c.start - 1) + c.offEnd) | 0
             : (Math.imul(entry.key, HASH_PRIME) + c.offStart * HASH_SPREAD + c.offEnd) | 0;
@@ -208,6 +244,7 @@ export function rankPlans(search: PlanSearch): Plan[] {
             first,
             chain: { period: c, prev: entry.chain },
             key,
+            ready: c.credit ? entry.ready : c.end - origin + gap + 1,
           };
           insert(target, next, made, limit);
           if (touch) insert(touch, next, made, limit);
@@ -272,6 +309,7 @@ function upperBounds(
   units: number,
   maxPeriods: number,
   creditUnits: number,
+  gap: number,
 ) {
   const table = (size: number) =>
     Array.from({ length: days + 2 }, () => new Array<number>(size + 1).fill(0));
@@ -285,7 +323,8 @@ function upperBounds(
         let most = vacation[t + 1][n][r];
         for (const c of vacationAt[t]) {
           if (c.cost > r) break;
-          const after = vacation[Math.min(c.offEnd - origin + BLOCK_GAP, days)][n - 1][r - c.cost];
+          const next = Math.max(c.offEnd - origin + BLOCK_GAP, c.end - origin + gap + 1);
+          const after = vacation[Math.min(next, days)][n - 1][r - c.cost];
           most = Math.max(most, c.offEnd - c.offStart + 1 + after);
         }
         vacation[t][n][r] = most;

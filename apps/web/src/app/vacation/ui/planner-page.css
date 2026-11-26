@@ -525,8 +525,10 @@ h3 {
   font-size: 13px;
 }
 
-/* As wide as the form and under it, before and after the plans show. */
+/* As wide as the form and under it, before and after the plans show. Never a scroll anchor: when
+   the plans appear above it, the page must not follow it down. */
 .faq {
+  overflow-anchor: none;
   max-width: var(--column);
   margin: 0 auto;
   padding: 8px 16px 32px;

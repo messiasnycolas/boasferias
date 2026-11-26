@@ -4,7 +4,7 @@ import { canStartClt, cltCandidates, cltEarliestStart, enjoyedDays } from './clt
 import { creditCandidates } from './credit';
 import { DaysOff, MON_FRI, MON_SAT } from './days-off';
 import { pjCandidates } from './pj';
-import { Period, Plan, rankPlans } from './planner';
+import { Period, PeriodRules, Plan, lengthOf, rankPlans } from './planner';
 
 const d = (iso: string): DayNumber => parseIsoDate(iso) as DayNumber;
 // August 2027: Mondays are 2, 9, 16, 23, 30.
@@ -283,6 +283,88 @@ describe('credit days', () => {
   });
 });
 
+describe('company rules', () => {
+  const daysOff = new DaysOff(MON_FRI, [d('2027-08-13')]);
+  const ranked = (rules: PeriodRules, days = 20, maxPeriods = 3, credit = 0) =>
+    rankPlans({
+      units: days,
+      maxPeriods,
+      splitNeedsLong: true,
+      candidates: cltCandidates(daysOff, FROM, TO, days, maxPeriods),
+      limit: 10,
+      credit: { units: credit, candidates: creditCandidates(daysOff, FROM, TO, credit, false) },
+      rules,
+    });
+  const gapsOf = (plan: Plan) => {
+    const vacation = plan.periods.filter((p) => !p.credit);
+    return vacation.slice(1).map((p, i) => p.start - vacation[i].end - 1);
+  };
+
+  it('keep every period between the shortest and the longest', () => {
+    const plans = ranked({ minLength: 6, maxLength: 14, gap: 0 });
+    expect(plans.length).toBeGreaterThan(0);
+    for (const plan of plans)
+      for (const p of plan.periods)
+        expect([6, 14, lengthOf(p)].sort((a, b) => a - b)[1]).toBe(lengthOf(p));
+  });
+
+  it('leave the gap between periods, and none when the rules are the defaults', () => {
+    const plans = ranked({ minLength: 5, maxLength: 30, gap: 7 });
+    expect(plans.length).toBeGreaterThan(0);
+    for (const plan of plans) for (const gap of gapsOf(plan)) expect(gap).toBeGreaterThanOrEqual(7);
+    expect(ranked({ minLength: 5, maxLength: 30, gap: 0 })).toEqual(clt(daysOff, 20, 3));
+  });
+
+  it('have no plan when the longest period cannot hold the days', () => {
+    expect(ranked({ minLength: 5, maxLength: 20, gap: 0 }, 30, 1)).toEqual([]);
+  });
+
+  it('keep the gap with credit days too, which may still touch a period', () => {
+    const plans = ranked({ minLength: 5, maxLength: 30, gap: 5 }, 19, 2, 2);
+    expect(plans.length).toBeGreaterThan(0);
+    for (const plan of plans) for (const gap of gapsOf(plan)) expect(gap).toBeGreaterThanOrEqual(5);
+  });
+
+  it('rank like a search of every plan', () => {
+    let seed = 11;
+    const random = (n: number) => {
+      seed = (seed * 1_103_515_245 + 12_345) % 2 ** 31;
+      return seed % n;
+    };
+    let found = 0;
+    for (let round = 0; round < 40; round++) {
+      const from = d('2027-08-02') + random(7);
+      const to = from + 20 + random(10);
+      const off = new DaysOff(
+        MON_FRI,
+        Array.from({ length: random(3) }, () => from + random(20)),
+      );
+      const days = 6 + random(8);
+      const maxPeriods = 1 + random(3);
+      const minLength = 5 + random(3);
+      const rules = { minLength, maxLength: minLength + random(10), gap: random(8) };
+      const limit = 1 + random(4);
+      const candidates = cltCandidates(off, from, to, days, maxPeriods);
+      const plans = rankPlans({
+        units: days,
+        maxPeriods,
+        splitNeedsLong: true,
+        candidates,
+        limit,
+        rules,
+      });
+      const all = everyPlan(candidates, days, maxPeriods, 0, rules);
+      const case_ = { round, days, maxPeriods, rules, limit };
+      expect({ ...case_, scores: plans.map((p) => p.daysOff) }).toEqual({
+        ...case_,
+        scores: all.slice(0, limit),
+      });
+      if (plans.length) found++;
+    }
+    expect(found).toBeGreaterThan(20);
+  });
+});
+
 /** Days off in the union of the plan's blocks. */
 function daysOffOf(periods: readonly Period[]): number {
   const off = new Set<number>();
@@ -291,8 +373,16 @@ function daysOffOf(periods: readonly Period[]): number {
 }
 
 /** Scores of every valid plan, distinct days off, best first: the planner's rules, by brute force. */
-function everyPlan(all: readonly Period[], units: number, maxPeriods: number, credit: number) {
+function everyPlan(
+  all: readonly Period[],
+  units: number,
+  maxPeriods: number,
+  credit: number,
+  rules: PeriodRules = { minLength: 1, maxLength: Infinity, gap: 0 },
+) {
   const byDays = new Map<string, number>();
+  const fits = (c: Period) =>
+    c.credit || (lengthOf(c) >= rules.minLength && lengthOf(c) <= rules.maxLength);
   const walk = (chosen: Period[], used: number, count: number, spent: number, long: boolean) => {
     if (used === units && spent === credit && (count < 2 || long)) {
       const off = new Set<number>();
@@ -300,9 +390,12 @@ function everyPlan(all: readonly Period[], units: number, maxPeriods: number, cr
       byDays.set([...off].sort((a, b) => a - b).join(), off.size);
     }
     const last = chosen.at(-1);
+    const lastVacation = chosen.filter((p) => !p.credit).at(-1);
     for (const c of all) {
+      if (!fits(c)) continue;
       // Credit may touch the block before it, and a period may touch credit before it.
       if (last && c.start < last.offEnd + (last.credit || c.credit ? 1 : 2)) continue;
+      if (!c.credit && lastVacation && c.start - lastVacation.end - 1 < rules.gap) continue;
       if (c.credit ? spent + c.cost > credit : count === maxPeriods || used + c.cost > units)
         continue;
       if (c.credit) walk([...chosen, c], used, count, spent + c.cost, long);

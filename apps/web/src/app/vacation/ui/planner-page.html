@@ -320,6 +320,49 @@
               }
             }
           </fieldset>
+
+          <fieldset class="field stacked group">
+            <legend>Regras da empresa</legend>
+            <p class="hint">
+              Em dias corridos.
+              @if (form().mode === 'clt') {
+                Na CLT, o máximo fica em 14 ou mais: um dos períodos precisa ter pelo menos 14 dias
+                (art. 134).
+              }
+            </p>
+            @for (rule of rules; track rule.field) {
+              <div class="field">
+                <label [for]="rule.field">{{ rule.label }}</label>
+                <div class="stepper">
+                  <button
+                    type="button"
+                    [attr.aria-label]="'Menos um dia: ' + rule.label"
+                    [disabled]="form()[rule.field] <= range(rule.field)[0]"
+                    (click)="step(rule.field, -1)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" /></svg>
+                  </button>
+                  <input
+                    [id]="rule.field"
+                    type="number"
+                    inputmode="numeric"
+                    [min]="range(rule.field)[0]"
+                    [max]="range(rule.field)[1]"
+                    [value]="form()[rule.field]"
+                    (input)="typed(rule.field, $any($event.target).value)"
+                  />
+                  <button
+                    type="button"
+                    [attr.aria-label]="'Mais um dia: ' + rule.label"
+                    [disabled]="form()[rule.field] >= range(rule.field)[1]"
+                    (click)="step(rule.field, 1)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" /></svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </fieldset>
         </details>
 
         <details class="more">
@@ -401,6 +444,9 @@
           <div class="card notice">
             Nenhum plano cabe entre {{ formatDate(form().earliestStart) }} e
             {{ formatDate(form().deadline) }}. Aumente o prazo ou reduza os dias.
+            @if (rulesSet()) {
+              Ou afrouxe as regras da empresa, em "Mais filtros".
+            }
           </div>
         } @else if (!result()) {
           <div class="card plan skeleton" aria-hidden="true"></div>

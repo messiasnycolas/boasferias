@@ -1,5 +1,5 @@
 import { CREDIT_MAX_DAYS } from '../domain/credit';
-import { Mode, SuggestError } from '../application/suggest-plans';
+import { MAX_GAP_DAYS, Mode, SuggestError } from '../application/suggest-plans';
 
 const TIME_ZONE = 'America/Sao_Paulo';
 const MONTH = new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' });
@@ -105,4 +105,5 @@ export const ERROR_MESSAGES: Record<SuggestError, string> = {
   'invalid-state': 'Não foi possível calcular. Recarregue a página.',
   'invalid-city': 'Não foi possível calcular. Recarregue a página.',
   'invalid-credit': `Use de 0 a ${CREDIT_MAX_DAYS} dias de banco de horas.`,
+  'invalid-rules': `Confira as regras da empresa: o mínimo não passa do máximo, na CLT o máximo é de 14 dias ou mais, e o intervalo vai até ${MAX_GAP_DAYS} dias.`,
 };

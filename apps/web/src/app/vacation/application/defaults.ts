@@ -7,7 +7,7 @@ import {
 } from '../../calendar/domain/calendar-date';
 import { cltEarliestStart } from '../domain/clt';
 import { MON_FRI, MON_SAT } from '../domain/days-off';
-import { Mode, SuggestInput } from './suggest-plans';
+import { LIMITS, Mode, SuggestInput } from './suggest-plans';
 
 const DEFAULT_DAYS: Record<Mode, number> = { clt: 30, pj: 20 };
 const DEFAULT_MAX_PERIODS = 3;
@@ -40,6 +40,10 @@ export function defaultInput(mode: Mode, today: string): SuggestInput {
     leaveDays: [],
     creditDays: 0,
     creditInRow: false,
+    // No company rule: any length the law allows, no wait between periods.
+    minPeriod: LIMITS[mode].periodLength[0],
+    maxPeriod: LIMITS[mode].periodLength[1],
+    periodGap: 0,
     limit: DEFAULT_LIMIT,
   };
 }

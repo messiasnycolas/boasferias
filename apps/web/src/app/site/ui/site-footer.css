@@ -1,5 +1,7 @@
 :host {
   --focus: var(--coconut);
+  /* Like the FAQ: content appearing above must not drag the page down with it. */
+  overflow-anchor: none;
   display: block;
   max-width: var(--column);
   margin: 0 auto;

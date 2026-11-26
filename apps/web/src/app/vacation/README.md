@@ -5,6 +5,7 @@ Ranks vacation plans for CLT and PJ workers.
 - `domain/days-off.ts`: work week + holidays -> which days are worked.
 - `domain/clt.ts`, `domain/pj.ts`, `domain/credit.ts`: rules and every allowed period (candidate); credit days (banco de horas) are workday candidates with their own budget.
 - `domain/planner.ts`: picks the best combination of candidates (dynamic programming, top-N per state). With credit, the state also holds the credit spent (up to 16× the states), so the search runs with a floor: partial plans that cannot reach it, even counting the best vacation and the best credit left apart, are dropped. The floor starts at that bound and comes down a day at a time until enough plans reach it, so results stay exact; `vacation.spec.ts` checks them against a brute-force search.
+- Company rules (`PeriodRules` in `domain/planner.ts`): lengths filter the candidates, and a gap holds a plan back until the next period may start. Exact without credit days; with credit and a gap, a plan is rarely missed (see the planner's comment).
 - `application/`: what the UI calls: `suggest-plans.ts` (validates, ranks, ISO dates in and out), `defaults.ts`, `plan-calendar.ts` (month grids of a plan).
 - `ui/`: the page, the calendar view and the Web Worker that runs the planner.
 

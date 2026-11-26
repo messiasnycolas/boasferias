@@ -39,6 +39,9 @@ describe('defaultInput', () => {
       leaveDays: [],
       creditDays: 0,
       creditInRow: false,
+      minPeriod: 5,
+      maxPeriod: 30,
+      periodGap: 0,
       limit: 3,
     });
   });

@@ -943,3 +943,26 @@ test.describe('FAQ', () => {
     expect(await response.text()).toContain('# Boas Férias');
   });
 });
+
+test.describe('company rules', () => {
+  test('keep CLT splits possible, and say when they leave no plan', async ({ page }) => {
+    await page.getByText('Mais filtros').click();
+    const longest = page.getByLabel('Período máximo', { exact: true });
+    await longest.fill('14');
+    await expect(page.getByRole('button', { name: 'Menos um dia: Período máximo' })).toBeDisabled();
+
+    // One period of 30 days cannot fit in 14.
+    await page.getByRole('button', { name: 'Menos um período' }).click();
+    await page.getByRole('button', { name: 'Menos um período' }).click();
+    await page.getByRole('button', { name: 'Ver melhores datas' }).click();
+    await expect(page.getByText(/afrouxe as regras da empresa/)).toBeVisible();
+
+    // Three periods fit: 14 + 11 + 5, two months apart.
+    await page.getByRole('button', { name: 'Mais um período' }).click();
+    await page.getByRole('button', { name: 'Mais um período' }).click();
+    await page.getByLabel('Intervalo entre períodos', { exact: true }).fill('60');
+    await expect(page.getByRole('heading', { name: 'Plano A', exact: true })).toBeVisible();
+    const { violations } = await new AxeBuilder({ page }).include('form').analyze();
+    expect(violations).toEqual([]);
+  });
+});

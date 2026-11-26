@@ -15,6 +15,9 @@ const base: SuggestInput = {
   leaveDays: ['2027-08-13'],
   creditDays: 0,
   creditInRow: false,
+  minPeriod: 1,
+  maxPeriod: 30,
+  periodGap: 0,
   limit: 3,
 };
 
@@ -188,5 +191,48 @@ describe('suggestPlans', () => {
     expect(run({ days: 30, deadline: '2027-08-30' })).toEqual(
       expect.objectContaining({ ok: true, plans: [] }),
     );
+  });
+});
+
+describe('company rules', () => {
+  it('reject a shortest period over the longest, a CLT longest under 14, or a gap over 180', () => {
+    for (const change of [
+      { minPeriod: 15, maxPeriod: 14 },
+      { maxPeriod: 13 },
+      { minPeriod: 0 },
+      { periodGap: 181 },
+      { periodGap: 1.5 },
+    ])
+      expect(suggestPlans({ ...base, ...change })).toEqual({ ok: false, error: 'invalid-rules' });
+    expect(suggestPlans({ ...base, mode: 'pj', minPeriod: 1, maxPeriod: 3 }).ok).toBe(true);
+  });
+
+  it('apply to the plans', () => {
+    const result = suggestPlans({ ...base, days: 20, maxPeriods: 3, maxPeriod: 14, periodGap: 3 });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.plans.length).toBeGreaterThan(0);
+    const day = 86_400_000;
+    for (const plan of result.plans) {
+      for (const p of plan.periods)
+        expect(Date.parse(p.end) - Date.parse(p.start)).toBeLessThanOrEqual(13 * day);
+      for (let i = 1; i < plan.periods.length; i++)
+        expect(
+          (Date.parse(plan.periods[i].start) - Date.parse(plan.periods[i - 1].end)) / day - 1,
+        ).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('keep the longest PJ period open by default: 30 workdays span 40 calendar days', () => {
+    const result = suggestPlans({
+      ...base,
+      mode: 'pj',
+      days: 30,
+      maxPeriods: 1,
+      deadline: '2027-10-31',
+      leaveDays: [],
+      maxPeriod: 60,
+    });
+    if (!result.ok) throw new Error(result.error);
+    expect(result.plans.length).toBeGreaterThan(0);
   });
 });

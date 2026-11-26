@@ -27,7 +27,9 @@ import { parseIsoDate } from '../../calendar/domain/calendar-date';
 import { Uf } from '../../calendar/domain/state-holidays';
 import {
   HolidayView,
+  CLT_MIN_LONGEST,
   LIMITS,
+  MAX_GAP_DAYS,
   MAX_LIMIT,
   Mode,
   SuggestInput,
@@ -50,7 +52,8 @@ import { PlanMonths } from './plan-months';
 import { PlannerClient } from './planner-client';
 import { STATE_OPTIONS, saveState, savedState } from './states';
 
-type StepField = 'days' | 'maxPeriods' | 'creditDays';
+type StepField = 'days' | 'maxPeriods' | 'creditDays' | RuleField;
+type RuleField = 'minPeriod' | 'maxPeriod' | 'periodGap';
 type WeekPreset = keyof typeof WORK_WEEKS | 'custom';
 
 const RECOMPUTE_DELAY_MS = 250;
@@ -60,6 +63,11 @@ const LEAVE_MESSAGES: Record<LeaveError, string> = {
   'too-long': 'Adicione até 60 dias por vez.',
 };
 const MORE_PLANS_STEP = 5;
+const RULES: readonly { field: RuleField; label: string }[] = [
+  { field: 'minPeriod', label: 'Período mínimo' },
+  { field: 'maxPeriod', label: 'Período máximo' },
+  { field: 'periodGap', label: 'Intervalo entre períodos' },
+];
 const WEEKDAY_CHIPS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
@@ -114,6 +122,13 @@ export class PlannerPage {
   protected readonly canAddHoliday = computed(() => parseIsoDate(this.holidayDate()) !== null);
   protected readonly maxLeaveRuns = MAX_LEAVE_RUNS;
   protected readonly creditMax = CREDIT_MAX_DAYS;
+  protected readonly rules = RULES;
+  /** Some company rule differs from the default (none). */
+  protected readonly rulesSet = computed(() => {
+    const { minPeriod, maxPeriod, periodGap } = this.form();
+    const [shortest, longest] = this.limits().periodLength;
+    return minPeriod > shortest || maxPeriod < longest || periodGap > 0;
+  });
 
   protected readonly weekChips = WEEKDAY_CHIPS;
   protected readonly weekNames = WEEKDAY_NAMES;
@@ -212,8 +227,17 @@ export class PlannerPage {
   protected setMode(mode: Mode): void {
     if (mode === this.form().mode) return;
     const { workWeek, state, city, removedHolidays, addedHolidays, leaveDays } = this.form();
+    const { minPeriod, maxPeriod, periodGap } = this.form();
+    const [shortest, longest] = LIMITS[mode].periodLength;
+    const oldLongest = this.limits().periodLength[1];
+    // Company rules stay; no limit stays no limit, and the CLT floor of 14 applies.
+    const floor = mode === 'clt' ? CLT_MIN_LONGEST : shortest;
+    const max = maxPeriod === oldLongest ? longest : Math.min(longest, Math.max(maxPeriod, floor));
     this.form.set({
       ...defaultInput(mode, todayIso()),
+      minPeriod: Math.min(Math.max(minPeriod, shortest), max),
+      maxPeriod: max,
+      periodGap,
       workWeek,
       state,
       city,
@@ -240,9 +264,23 @@ export class PlannerPage {
     if (value !== '' && Number.isFinite(number)) this.patch({ [field]: number });
   }
 
-  private range(field: StepField): readonly [number, number] {
-    if (field === 'creditDays') return [0, CREDIT_MAX_DAYS];
-    return field === 'days' ? this.limits().days : this.limits().periods;
+  protected range(field: StepField): readonly [number, number] {
+    const { mode, minPeriod, maxPeriod } = this.form();
+    const [shortest, longest] = this.limits().periodLength;
+    switch (field) {
+      case 'creditDays':
+        return [0, CREDIT_MAX_DAYS];
+      case 'days':
+        return this.limits().days;
+      case 'maxPeriods':
+        return this.limits().periods;
+      case 'minPeriod':
+        return [shortest, maxPeriod];
+      case 'maxPeriod':
+        return [Math.max(minPeriod, mode === 'clt' ? CLT_MIN_LONGEST : shortest), longest];
+      case 'periodGap':
+        return [0, MAX_GAP_DAYS];
+    }
   }
 
   protected setWeek(preset: WeekPreset): void {

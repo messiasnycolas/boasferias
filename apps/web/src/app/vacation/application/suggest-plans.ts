@@ -2,6 +2,7 @@ import { DayNumber, parseIsoDate, toIsoDate, yearOf } from '../../calendar/domai
 import { Holiday, HolidayRule, holidays } from '../../calendar/domain/holidays';
 import { STATES, Uf } from '../../calendar/domain/state-holidays';
 import {
+  CLT_LONG_PERIOD,
   CLT_MAX_DAYS,
   CLT_MAX_PERIODS,
   CLT_SHORT_PERIOD,
@@ -14,16 +15,32 @@ import { PJ_MAX_DAYS, PJ_MAX_PERIODS, pjCandidates } from '../domain/pj';
 import { Period, rankPlans } from '../domain/planner';
 
 export const MAX_WINDOW_DAYS = 400;
+/** Longest wait between periods a company rule may set. */
+export const MAX_GAP_DAYS = 180;
+/** Top of the PJ "longest period" field, in calendar days: there it means no limit. */
+const PJ_MAX_SPAN = 60;
 export const MAX_LIMIT = 20;
 const WEEKDAYS = 7;
 
 export type Mode = 'clt' | 'pj';
 
 /** Input ranges per mode, for the form. */
-export const LIMITS: Record<Mode, { days: [number, number]; periods: [number, number] }> = {
-  clt: { days: [CLT_SHORT_PERIOD, CLT_MAX_DAYS], periods: [1, CLT_MAX_PERIODS] },
-  pj: { days: [1, PJ_MAX_DAYS], periods: [1, PJ_MAX_PERIODS] },
+export const LIMITS: Record<
+  Mode,
+  { days: [number, number]; periods: [number, number]; periodLength: [number, number] }
+> = {
+  clt: {
+    days: [CLT_SHORT_PERIOD, CLT_MAX_DAYS],
+    periods: [1, CLT_MAX_PERIODS],
+    periodLength: [CLT_SHORT_PERIOD, CLT_MAX_DAYS],
+  },
+  // PJ spends workdays, so a period spans more calendar days: 30 workdays with holidays or leave
+  // inside run past 40.
+  pj: { days: [1, PJ_MAX_DAYS], periods: [1, PJ_MAX_PERIODS], periodLength: [1, PJ_MAX_SPAN] },
 };
+
+/** CLT: a longest period under 14 days would rule out every split (art. 134 §1). */
+export const CLT_MIN_LONGEST = CLT_LONG_PERIOD;
 
 export interface SuggestInput {
   mode: Mode;
@@ -50,6 +67,10 @@ export interface SuggestInput {
   creditDays: number;
   /** Credit days in one run instead of wherever they rest most. */
   creditInRow: boolean;
+  /** Company rules: shortest and longest period in calendar days, and days between periods. */
+  minPeriod: number;
+  maxPeriod: number;
+  periodGap: number;
   limit: number;
 }
 
@@ -63,7 +84,8 @@ export type SuggestError =
   | 'invalid-limit'
   | 'invalid-state'
   | 'invalid-city'
-  | 'invalid-credit';
+  | 'invalid-credit'
+  | 'invalid-rules';
 
 export interface PeriodView {
   start: string;
@@ -128,6 +150,14 @@ function validate(input: SuggestInput, from: DayNumber, to: DayNumber): SuggestE
   if (input.city !== null && (input.state === null || !input.city.every(validRule)))
     return 'invalid-city';
   if (!isIntIn(input.creditDays, 0, clt ? CREDIT_MAX_DAYS : 0)) return 'invalid-credit';
+  // A shortest period under the law's minimum changes nothing, so it is allowed.
+  const longest = LIMITS[input.mode].periodLength[1];
+  if (
+    !isIntIn(input.minPeriod, 1, longest) ||
+    !isIntIn(input.maxPeriod, Math.max(input.minPeriod, clt ? CLT_MIN_LONGEST : 1), longest) ||
+    !isIntIn(input.periodGap, 0, MAX_GAP_DAYS)
+  )
+    return 'invalid-rules';
   return null;
 }
 
@@ -232,6 +262,13 @@ export function suggestPlans(input: SuggestInput): SuggestResult {
     credit: {
       units: input.creditDays,
       candidates: creditCandidates(daysOff, from, to, input.creditDays, input.creditInRow),
+    },
+    rules: {
+      minLength: input.minPeriod,
+      // The field's top value is no rule at all (PJ periods may span more).
+      maxLength:
+        input.maxPeriod === LIMITS[input.mode].periodLength[1] ? Infinity : input.maxPeriod,
+      gap: input.periodGap,
     },
   });
 
